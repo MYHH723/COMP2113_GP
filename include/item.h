@@ -24,7 +24,7 @@ enum class Difficulty {
 class Item {
 private:
     ItemType type;
-    int grade;              // 0=Low, 1=Mid, 2=High
+    int grade;              // 0=Level1, 1=Level2, 2=Level3
     std::string name;
     int effectValue;
     int price;

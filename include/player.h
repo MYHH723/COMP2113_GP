@@ -5,9 +5,7 @@
 #include <map>
 #include <list>
 #include <vector>
-
-// Forward declaration
-class Inventory;
+#include "item.h"
 
 // Player class - manages player character attributes and inventory
 class Player {
@@ -49,6 +47,8 @@ public:
     void remove_item(const std::string& itemName);
     void use_item(const std::string& itemName);
     void show_items() const;
+    void sort_items();
+    std::string itemToString(const Item& item);
 
     // Save/Load
     void save();
@@ -87,6 +87,7 @@ public:
     bool remove_item(const std::string& itemName);
     bool use_item(const std::string& itemName);
     void show_items() const;
+    void sort_items();
     int get_capacity() const;
     int get_current_size() const;
 };
