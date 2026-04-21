@@ -1,4 +1,5 @@
-#include "player.h"
+#include "player.h" 
+#include "savegame.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -248,35 +249,11 @@ std::string Player::itemToString(const Item& item) {
 }
 
 void Player::save() {
-    // Simple save to file
-    std::ofstream file(SAVE_FILE);
-    if (file.is_open()) {
-        file << "ATK:" << get_ATK() << std::endl;
-        file << "DEF:" << get_DEF() << std::endl;
-        file << "HP:" << get_HP() << std::endl;
-        file << "EXP:" << get_EXP() << std::endl;
-        file << "Money:" << get_Money() << std::endl;
-        file.close();
-        std::cout << "Game saved." << std::endl;
-    }
+    saveGame(*this);  // Delegate to modular implementation
 }
 
 void Player::load_save() {
-    // Simple load from file
-    std::ifstream file(SAVE_FILE);
-    if (file.is_open()) {
-        std::string line;
-        while (std::getline(file, line)) {
-            size_t pos = line.find(':');
-            if (pos != std::string::npos) {
-                std::string key = line.substr(0, pos);
-                float value = std::stof(line.substr(pos + 1));
-                state[key] = value;
-            }
-        }
-        file.close();
-        std::cout << "Game loaded." << std::endl;
-    }
+    loadGame(*this);  // Delegate to modular implementation
 }
 
 // Demo main function

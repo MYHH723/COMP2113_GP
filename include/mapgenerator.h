@@ -1,6 +1,8 @@
 #ifndef MAPGENERATOR_H
 #define MAPGENERATOR_H
 
+#include "room.h"
+#include "types.h"
 #include <vector>
 #include <string>
 
@@ -27,6 +29,8 @@ public:
     Room* generateRoom(int roomId, int roomNumber);
     void determineRoomType(Room* room, int roomNumber);
 
+    RoomType determineRoomType(int roomNumber);
+
     // Getters
     std::vector<Room*> getGeneratedRooms() const;
     int getTotalRooms() const;
@@ -37,6 +41,8 @@ public:
     bool shouldHaveShop(int roomNumber);
     int getRandomMonsterCount(int difficulty);
     int getRandomTrapCount(int difficulty);
+
+    int countRoomsByType(RoomType type) const;
 };
 
 #endif // MAPGENERATOR_H
