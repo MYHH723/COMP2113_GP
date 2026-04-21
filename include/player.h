@@ -53,6 +53,8 @@ public:
     // Save/Load
     void save();
     void load_save();
+    friend void saveGame(const Player& );
+    friend void loadGame(Player& );
 };
 
 // Panel class - displays player attributes and inventory
@@ -83,6 +85,8 @@ public:
     Inventory();
     ~Inventory();
 
+    const std::list<std::string>& get_items() const { return items; }
+    void clear_items() { items.clear(); }
     bool add_item(const std::string& itemName);
     bool remove_item(const std::string& itemName);
     bool use_item(const std::string& itemName);

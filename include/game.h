@@ -19,7 +19,8 @@ private:
     std::string playerName; // Player name
     Player* player;         // Pointer to player object
     std::vector<Room*> rooms; // All rooms in current playthrough
-
+    std::vector<int> clearedRoomIds;  // Track which rooms player has cleared
+    unsigned mapSeed;                 // seed for map generation
 public:
     Game();
     ~Game();
@@ -44,11 +45,19 @@ public:
     bool get_isRunning() const;
     bool get_playerWin() const;
     std::string get_playerName() const;
+    std::vector<int> getClearedRooms() const;  // Returns IDs of cleared rooms
+    unsigned getRandomSeed() const;
 
     // Setters
     void set_difficulty(int diff);
     void set_currentRoom(int room);
     void set_isRunning(bool running);
+    void set_totalRooms(int rooms);
+    void set_playerName(const std::string& name);
+    void set_playerWin(bool win);
+    void setClearedRooms(const std::vector<int>& clearedIds);
+    void setRandomSeed(unsigned seed);//for reproducible generation
+    
 };
 
 // Utility functions (can be in utils.h separately if needed)
