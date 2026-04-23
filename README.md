@@ -7,6 +7,7 @@ A C++ based roguelike dungeon exploration game with difficulty scaling, combat s
 This is a text-based roguelike game where players navigate through procedurally generated dungeon rooms, fight monsters, avoid traps, manage inventory, and purchase items from a merchant. The game features three difficulty levels with scaled monster/trap difficulty.
 
 ### Features
+
 - **Difficulty System**: Easy, Normal, and Hard modes with scaled enemy stats and trap damage
 - **Combat System**: Turn-based battle mechanics with attack, defend, and flee options
 - **Room Generation**: Procedurally generated dungeons with shops, treasure rooms, and boss encounters
@@ -34,7 +35,8 @@ COMP2113_GP/
 │   ├── merchant.h           # Merchant/goods
 │   ├── shop.h               # Shop transactions
 │   ├── gamelogger.h         # Transaction logging
-│   └── gametester.h         # Testing framework
+│   ├── gametester.h         # Testing framework
+│   └── consoleUI.h.         # Generate Console Window UI
 │
 ├── data/                     # Game data storage
 │   └── save.json            # Player save file (auto-generated)
@@ -52,6 +54,7 @@ COMP2113_GP/
 ## Module Breakdown
 
 ### Member 1: Game Core (game.h)
+
 - Main game loop and flow control
 - Difficulty selection and initialization
 - Menu system and game state management
@@ -59,25 +62,30 @@ COMP2113_GP/
 - Global difficulty constants and multipliers
 
 ### Member 2: Player System (player.h)
+
 - **Player Class**: Manages HP, ATK, DEF, EXP, Money, status effects
 - **Inventory Class**: Item storage with capacity limits (max 20 items)
 - **Panel Class**: Display formatted player stats, inventory, and conditions
 - Save/load functionality to JSON
 
 ### Member 3: Combat System (monster.h, trap.h, battlesystem.h)
+
 - **Monster Class**: Enemy entities with scalable difficulty stats
 - **Trap Class**: Environmental hazards (Spike Pit, Poison Gas, Falling Block, Fire Blast)
 - **BattleSystem Class**: Turn-based combat with attack/defend/flee mechanics
 - Damage calculations with variance
 - Battle logging and result tracking
 
-### Member 4: Room & Map System (room.h, mapgenerator.h)
+### Member 4: Room & Map System (consoleUI.h, room.h, mapgenerator.h)
+
+- **ConsoleUI Class**: UI demonstrating player's status and inventory level
 - **Room Class**: Individual dungeon rooms with content and state tracking
 - **MapGenerator Class**: Procedural dungeon generation
 - Room types: Normal, Boss, Shop, Treasure
 - Difficulty-based content scaling
 
 ### Member 5: Shop System (item.h, merchant.h, shop.h, gamelogger.h, gametester.h)
+
 - **Item Class**: Three types (Potion, Sword, Armor) with three grades (Low/Mid/High)
 - **Merchant Class**: Goods management with unlimited stock
 - **Shop Class**: Buy/sell transactions with gold management
@@ -88,7 +96,7 @@ COMP2113_GP/
 
 1. **Main Menu**: Player selects New Game, Load Game, or Exit
 2. **Difficulty Selection**: Choose Easy/Normal/Hard
-3. **Game Loop**: 
+3. **Game Loop**:
    - Enter next room
    - Encounter monsters and/or traps
    - Battle or shop interactions
@@ -97,11 +105,11 @@ COMP2113_GP/
 
 ## Difficulty Scaling
 
-| Difficulty | Total Rooms | Monster HP | Trap Damage | Shop Frequency |
-|-----------|----------|-----------|------------|----------------|
-| Easy      | 10       | 0.8x      | Low        | Every 3-4 rooms|
-| Normal    | 15       | 1.0x      | Medium     | Every 4-5 rooms|
-| Hard      | 20       | 1.3x      | High       | Every 5-6 rooms|
+| Difficulty | Total Rooms | Monster HP | Trap Damage | Shop Frequency  |
+| ---------- | ----------- | ---------- | ----------- | --------------- |
+| Easy       | 10          | 0.8x       | Low         | Every 3-4 rooms |
+| Normal     | 15          | 1.0x       | Medium      | Every 4-5 rooms |
+| Hard       | 20          | 1.3x       | High        | Every 5-6 rooms |
 
 ## Player Stats
 
@@ -115,16 +123,19 @@ COMP2113_GP/
 ## Item System
 
 ### Potions (Consumable)
+
 - **Low Grade**: +5 HP, 5 gold
 - **Mid Grade**: +10 HP, 10 gold
 - **High Grade**: +15 HP, 15 gold
 
 ### Swords (Equipment)
+
 - **Low Grade**: +10 ATK, 15 gold
 - **Mid Grade**: +20 ATK, 25 gold
 - **High Grade**: +30 ATK, 40 gold
 
 ### Armor (Equipment)
+
 - **Low Grade**: +5 DEF, 20 gold
 - **Mid Grade**: +10 DEF, 35 gold
 - **High Grade**: +15 DEF, 50 gold
@@ -176,7 +187,7 @@ g++ -std=c++11 -pthread -o game src/*.cpp
 - Member 1: Game Core & Flow
 - Member 2: Player System & Inventory
 - Member 3: Combat System
-- Member 4: Room & Map Generation
+- Member 4: UI & Room & Map Generation
 - Member 5: Shop & Item System
 
 ## Notes
