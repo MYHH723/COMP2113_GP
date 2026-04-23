@@ -1,46 +1,82 @@
-#include "player.h" 
+#include "player.h"
 #include "savegame.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+
+static void printWindow(const std::string &title, const std::vector<std::string> &lines, int width = 60)
+{
+    if (width < 20)
+        width = 20;
+    std::string separator(width - 2, '-');
+
+    std::cout << "+" << separator << "+\n";
+    std::string titleLine = "| " + title;
+    if (titleLine.size() > (size_t)width - 1)
+        titleLine = titleLine.substr(0, width - 3) + "...";
+    titleLine += std::string(width - 1 - titleLine.size(), ' ') + "|\n";
+    std::cout << titleLine;
+    std::cout << "+" << separator << "+\n";
+
+    for (const auto &line : lines)
+    {
+        std::string content = "| " + line;
+        if (content.size() > (size_t)width - 1)
+            content = content.substr(0, width - 4) + "...";
+        content += std::string(width - 1 - content.size(), ' ') + "|\n";
+        std::cout << content;
+    }
+
+    std::cout << "+" << separator << "+\n";
+}
 
 // Inventory implementation
 Inventory::Inventory() : capacity(MAX_INVENTORY_SIZE) {}
 
 Inventory::~Inventory() {}
 
-bool Inventory::add_item(const std::string& itemName) {
-    if (items.size() < capacity) {
+bool Inventory::add_item(const std::string &itemName)
+{
+    if (items.size() < capacity)
+    {
         items.push_back(itemName);
         return true;
     }
     return false;
 }
 
-bool Inventory::remove_item(const std::string& itemName) {
+bool Inventory::remove_item(const std::string &itemName)
+{
     auto it = std::find(items.begin(), items.end(), itemName);
-    if (it != items.end()) {
+    if (it != items.end())
+    {
         items.erase(it);
         return true;
     }
     return false;
 }
 
-bool Inventory::use_item(const std::string& itemName) {
+bool Inventory::use_item(const std::string &itemName)
+{
     // Simple implementation: remove on use
     return remove_item(itemName);
 }
 
-void Inventory::show_items() const {
+void Inventory::show_items() const
+{
     std::cout << "Inventory (" << items.size() << "/" << capacity << "):" << std::endl;
-    for (const auto& itemStr : items) {
+    for (const auto &itemStr : items)
+    {
         // Parse name from "Type:Grade:Name:..."
         size_t pos1 = itemStr.find(':');
-        if (pos1 != std::string::npos) {
+        if (pos1 != std::string::npos)
+        {
             size_t pos2 = itemStr.find(':', pos1 + 1);
-            if (pos2 != std::string::npos) {
+            if (pos2 != std::string::npos)
+            {
                 size_t pos3 = itemStr.find(':', pos2 + 1);
-                if (pos3 != std::string::npos) {
+                if (pos3 != std::string::npos)
+                {
                     std::string name = itemStr.substr(pos2 + 1, pos3 - pos2 - 1);
                     std::cout << "- " << name << std::endl;
                 }
@@ -49,15 +85,16 @@ void Inventory::show_items() const {
     }
 }
 
-void Inventory::sort_items() {
+void Inventory::sort_items()
+{
     // Define type priorities: Sword > Armor > Potion
     std::map<std::string, int> typePriority = {
         {"SWORD", 3},
         {"ARMOR", 2},
-        {"POTION", 1}
-    };
+        {"POTION", 1}};
 
-    items.sort([&typePriority](const std::string& a, const std::string& b) {
+    items.sort([&typePriority](const std::string &a, const std::string &b)
+               {
         // Parse from "Type:Grade:Name:..."
         auto parse = [](const std::string& s) -> std::pair<std::string, int> {
             size_t pos1 = s.find(':');
@@ -79,15 +116,16 @@ void Inventory::sort_items() {
             return priA > priB;
         }
         // Then by grade (higher first)
-        return gradeA > gradeB;
-    });
+        return gradeA > gradeB; });
 }
 
-int Inventory::get_capacity() const {
+int Inventory::get_capacity() const
+{
     return capacity;
 }
 
-int Inventory::get_current_size() const {
+int Inventory::get_current_size() const
+{
     return items.size();
 }
 
@@ -96,7 +134,8 @@ Panel::Panel() {}
 
 Panel::~Panel() {}
 
-void Panel::show_status(const Player& player) {
+void Panel::show_status(const Player &player)
+{
     std::cout << "=== Player Status ===" << std::endl;
     std::cout << "ATK: " << player.get_ATK() << std::endl;
     std::cout << "DEF: " << player.get_DEF() << std::endl;
@@ -108,24 +147,28 @@ void Panel::show_status(const Player& player) {
     std::cout << "Stunned: " << (player.get_isStunned() ? "Yes" : "No") << std::endl;
 }
 
-void Panel::show_inventory(const Player& player) {
+void Panel::show_inventory(const Player &player)
+{
     std::cout << "=== Inventory ===" << std::endl;
     player.show_items();
 }
 
-void Panel::show_condition(const Player& player) {
+void Panel::show_condition(const Player &player)
+{
     std::cout << "=== Condition ===" << std::endl;
     std::cout << "Alive: " << (player.get_isAlive() ? "Yes" : "No") << std::endl;
     std::cout << "Poisoned: " << (player.get_isPoisoned() ? "Yes" : "No") << std::endl;
     std::cout << "Stunned: " << (player.get_isStunned() ? "Yes" : "No") << std::endl;
 }
 
-void Panel::show_message(const std::string& message) {
+void Panel::show_message(const std::string &message)
+{
     std::cout << "Message: " << message << std::endl;
 }
 
 // Player implementation
-Player::Player() {
+Player::Player()
+{
     state["ATK"] = DEFAULT_ATK;
     state["DEF"] = DEFAULT_DEF;
     state["HP"] = DEFAULT_HP;
@@ -137,127 +180,163 @@ Player::Player() {
     isStunned = false;
 }
 
-Player::~Player() {
+Player::~Player()
+{
     delete inventory;
 }
 
-std::map<std::string, float> Player::get_state() const {
+std::map<std::string, float> Player::get_state() const
+{
     return state;
 }
 
-float Player::get_ATK() const {
+float Player::get_ATK() const
+{
     return state.at("ATK");
 }
 
-float Player::get_DEF() const {
+float Player::get_DEF() const
+{
     return state.at("DEF");
 }
 
-float Player::get_HP() const {
+float Player::get_HP() const
+{
     return state.at("HP");
 }
 
-float Player::get_EXP() const {
+float Player::get_EXP() const
+{
     return state.at("EXP");
 }
 
-float Player::get_Money() const {
+float Player::get_Money() const
+{
     return state.at("Money");
 }
 
-bool Player::get_isAlive() const {
+bool Player::get_isAlive() const
+{
     return isAlive;
 }
 
-bool Player::get_isPoisoned() const {
+bool Player::get_isPoisoned() const
+{
     return isPoisoned;
 }
 
-bool Player::get_isStunned() const {
+bool Player::get_isStunned() const
+{
     return isStunned;
 }
 
-void Player::change_state(const std::string& key, float value) {
+void Player::change_state(const std::string &key, float value)
+{
     state[key] = value;
 }
 
-void Player::change_ATK(float amount) {
+void Player::change_ATK(float amount)
+{
     state["ATK"] += amount;
 }
 
-void Player::change_DEF(float amount) {
+void Player::change_DEF(float amount)
+{
     state["DEF"] += amount;
 }
 
-void Player::change_HP(float amount) {
+void Player::change_HP(float amount)
+{
     state["HP"] += amount;
-    if (state["HP"] <= 0) {
+    if (state["HP"] <= 0)
+    {
         isAlive = false;
     }
 }
 
-void Player::change_EXP(float amount) {
+void Player::change_EXP(float amount)
+{
     state["EXP"] += amount;
 }
 
-void Player::change_Money(float amount) {
+void Player::change_Money(float amount)
+{
     state["Money"] += amount;
 }
 
-void Player::set_isAlive(bool alive) {
+void Player::set_isAlive(bool alive)
+{
     isAlive = alive;
 }
 
-void Player::set_isPoisoned(bool poisoned) {
+void Player::set_isPoisoned(bool poisoned)
+{
     isPoisoned = poisoned;
 }
 
-void Player::set_isStunned(bool stunned) {
+void Player::set_isStunned(bool stunned)
+{
     isStunned = stunned;
 }
 
-void Player::add_item(const std::string& itemName) {
+void Player::add_item(const std::string &itemName)
+{
     inventory->add_item(itemName);
 }
 
-void Player::remove_item(const std::string& itemName) {
+void Player::remove_item(const std::string &itemName)
+{
     inventory->remove_item(itemName);
 }
 
-void Player::use_item(const std::string& itemName) {
+void Player::use_item(const std::string &itemName)
+{
     inventory->use_item(itemName);
 }
 
-void Player::show_items() const {
+void Player::show_items() const
+{
     inventory->show_items();
 }
 
-void Player::sort_items() {
+void Player::sort_items()
+{
     inventory->sort_items();
 }
 
-std::string Player::itemToString(const Item& item) {
+std::string Player::itemToString(const Item &item)
+{
     std::string typeStr;
-    switch (item.getType()) {
-        case ItemType::POTION: typeStr = "POTION"; break;
-        case ItemType::SWORD: typeStr = "SWORD"; break;
-        case ItemType::ARMOR: typeStr = "ARMOR"; break;
+    switch (item.getType())
+    {
+    case ItemType::POTION:
+        typeStr = "POTION";
+        break;
+    case ItemType::SWORD:
+        typeStr = "SWORD";
+        break;
+    case ItemType::ARMOR:
+        typeStr = "ARMOR";
+        break;
     }
     return typeStr + ":" + std::to_string(item.getGrade()) + ":" + item.getName() + ":" +
            std::to_string(item.getEffectValue()) + ":" + std::to_string(item.getPrice()) + ":" +
            std::to_string(item.getOriginalPurchasePrice()) + ":" + (item.isConsumableItem() ? "true" : "false");
 }
 
-void Player::save() {
-    saveGame(*this);  // Delegate to modular implementation
+void Player::save()
+{
+    saveGame(*this); // Delegate to modular implementation
 }
 
-void Player::load_save() {
-    loadGame(*this);  // Delegate to modular implementation
+void Player::load_save()
+{
+    loadGame(*this); // Delegate to modular implementation
 }
 
 // Demo main function
-int main() {
+int main()
+{
     Player player;
     Panel panel;
 
@@ -271,15 +350,15 @@ int main() {
     player.change_HP(-200);
 
     Item sword2;
-    sword2.initItem(ItemType::SWORD, 2);  // Level3
+    sword2.initItem(ItemType::SWORD, 2); // Level3
     player.add_item(player.itemToString(sword2));
 
     Item armor1;
-    armor1.initItem(ItemType::ARMOR, 1);  // Level2
+    armor1.initItem(ItemType::ARMOR, 1); // Level2
     player.add_item(player.itemToString(armor1));
 
     Item sword0;
-    sword0.initItem(ItemType::SWORD, 0);  // Level1
+    sword0.initItem(ItemType::SWORD, 0); // Level1
     player.add_item(player.itemToString(sword0));
 
     panel.show_message("Player gained 50 ATK, lost 200 HP, and acquired items.");
@@ -303,4 +382,3 @@ int main() {
 
     return 0;
 }
-
