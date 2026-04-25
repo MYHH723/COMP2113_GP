@@ -3,10 +3,13 @@
 #include <iostream>
 #include <string>
 #include "consoleUI.h"
+#include <ctime>
 
 // Demo main function to test Player and ConsoleUI
 int main()
 {
+    // Seed the random generator
+    srand(time(nullptr));
     try
     {
         Player player;

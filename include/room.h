@@ -11,15 +11,6 @@ class Monster;
 class Trap;
 class Player;
 
-// Declaration of RoomType enum
-enum RoomType
-{
-    NORMAL,
-    BOSS,
-    SHOP,
-    TREASURE
-};
-
 // Room class - represents a single game room
 class Room
 {
