@@ -41,43 +41,111 @@ void Room::generateRoomContent(int diff)
     monsters.clear();
     traps.clear();
 
-    // Use your difficulty-based constants
+    // Variables for monster and trap counts
     int monsterCount = 0;
     int trapCount = 0;
 
-    switch (diff)
+    // Determine counts based on room type and difficulty
+    switch (roomType)
     {
-    case 0:                            // Easy
-        monsterCount = 1 + rand() % 2; // 1-2
-        trapCount = rand() % 2;        // 0-1
+    case NORMAL:
+        // Normal rooms: 1-3 monsters, 0-2 traps (based on difficulty)
+        switch (diff)
+        {
+        case 0: // Easy: 1-2 monsters, 0-1 traps
+            monsterCount = 1 + rand() % 2;
+            trapCount = rand() % 2;
+            break;
+        case 1: // Normal: 1-3 monsters, 0-2 traps
+            monsterCount = 1 + rand() % 3;
+            trapCount = rand() % 3;
+            break;
+        case 2: // Hard: 2-4 monsters, 1-3 traps
+            monsterCount = 2 + rand() % 3;
+            trapCount = 1 + rand() % 3;
+            break;
+        }
         break;
-    case 1:                            // Normal
-        monsterCount = 1 + rand() % 3; // 1-3
-        trapCount = rand() % 3;        // 0-2
+
+    case BOSS:
+        // Boss rooms: 1 powerful monster, 1-2 traps
+        monsterCount = 1;
+        trapCount = 1 + rand() % 2;
         break;
-    case 2:                            // Hard
-        monsterCount = 2 + rand() % 3; // 2-4
-        trapCount = 1 + rand() % 3;    // 1-3
+
+    case SHOP:
+        // Shop rooms: no monsters/traps
+        monsterCount = 0;
+        trapCount = 0;
+        break;
+
+    case TREASURE:
+        // Treasure rooms: 0-1 weak monster, no traps
+        monsterCount = rand() % 2; // 0 or 1
+        trapCount = 0;
         break;
     }
 
-    // Create monsters (you'll need to integrate with Monster class)
+    // Create monsters
     for (int i = 0; i < monsterCount; i++)
     {
-        // monsters.push_back(new Monster(/* params */));
+        Monster *monster = new Monster();
+        monster->initMonster(diff, diff + 1); // level based on difficulty
+        monsters.push_back(monster);
     }
 
     // Create traps
     for (int i = 0; i < trapCount; i++)
     {
-        // traps.push_back(new Trap(/* params */));
+        Trap *trap = new Trap();
+
+        // Randomly select trap type
+        TrapType type;
+        int trapRoll = rand() % 4;
+        switch (trapRoll)
+        {
+        case 0:
+            type = TrapType::SPIKE_PIT;
+            break;
+        case 1:
+            type = TrapType::POISON_GAS;
+            break;
+        case 2:
+            type = TrapType::FALLING_BLOCK;
+            break;
+        case 3:
+            type = TrapType::FIRE_BLAST;
+            break;
+        }
+
+        trap->initTrap(type, diff);
+        traps.push_back(trap);
     }
+
+    // Update room description based on content
+    std::ostringstream desc;
+    switch (roomType)
+    {
+    case NORMAL:
+        desc << "A dimly lit chamber with " << monsterCount << " enemies lurking.";
+        break;
+    case BOSS:
+        desc << "A grand hall. A powerful foe awaits!";
+        break;
+    case SHOP:
+        desc << "A quiet room with a merchant's stall.";
+        break;
+    case TREASURE:
+        desc << "A glimmering treasure room. Riches await!";
+        break;
+    }
+    description = desc.str();
 }
 
 // Display room information
 std::string Room::showRoomInfo() const
 {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "Room ID: " << roomId << "\n";
     ss << "Difficulty: " << difficulty << "\n";
     ss << "Type: ";
@@ -165,16 +233,4 @@ void Room::setHasShop(bool shop)
 void Room::setRoomType(RoomType type)
 {
     roomType = type;
-}
-
-// Create monsters
-for (int i = 0; i < monsterCount; i++)
-{
-    monsters.push_back(new Monster(diff)); // Example constructor
-}
-
-// Create traps
-for (int i = 0; i < trapCount; i++)
-{
-    traps.push_back(new Trap(diff)); // Example constructor
 }
