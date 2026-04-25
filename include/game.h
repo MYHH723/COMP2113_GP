@@ -1,62 +1,60 @@
+
+// game.h
+// Declaration of the Game class – controls the whole game flow.
+
 #ifndef GAME_H
 #define GAME_H
 
 #include <string>
 #include <vector>
 
-// Forward declarations
+// Forward declarations of modules implemented by other team members
 class Player;
+class MapGenerator;
 class Room;
+class BattleSystem;
+class Shop;
 
-// Game class - manages overall game flow and state
 class Game {
 private:
-    int difficulty;         // 0=Easy, 1=Normal, 2=Hard
-    int totalRooms;         // Total rooms to clear
-    int currentRoom;        // Current room index
-    bool isRunning;         // Game is active
-    bool playerWin;         // Player completed all rooms
-    std::string playerName; // Player name
-    Player* player;         // Pointer to player object
-    std::vector<Room*> rooms; // All rooms in current playthrough
-    std::vector<int> clearedRoomIds;  // Track which rooms player has cleared
-    unsigned mapSeed;                 // seed for map generation
+    // Game state variables
+    int difficulty;          // 0 = Easy, 1 = Normal, 2 = Hard
+    int totalRooms;          // Number of rooms to clear (depends on difficulty)
+    int currentRoomIndex;    // Index of the room the player is in (0-based)
+    bool isRunning;          // True while the game is active
+    bool playerWin;          // True if player cleared all rooms
+
+    std::string playerName;  // Name entered by the player
+    Player* player;          // Player object (dynamically allocated)
+
+    // Map and rooms
+    MapGenerator* mapGen;    // Generates the dungeon layout
+    std::vector<Room*> rooms; // List of all rooms in the current game
+
+    // Private helper methods
+    void generateRooms();    // Uses MapGenerator to create all rooms
+    void applyDifficultyScaling(); // Sets global modifiers for monsters/traps
+
 public:
-    Game();
-    ~Game();
+    Game();                  // Constructor
+    ~Game();                 // Destructor (cleans up dynamic memory)
 
-    // Menu & Initialization
-    void showMainMenu();
-    void selectDifficulty();
-    void initGame();
+    // Menu and initialization
+    void showMainMenu();     // Displays new game, load game, exit
+    void selectDifficulty(); // Lets player choose difficulty
+    void initGame();         // Starts a new game with chosen difficulty
 
-    // Game core loop
-    void gameLoop();
-    void enterNextRoom();
+    // Main game loop
+    void gameLoop();         // Runs the core gameplay
+    void enterNextRoom();    // Enters the next room and processes its event
 
-    // Game end logic
-    void checkGameOver();
-    void showGameResult();
+    // Game ending
+    void checkGameOver();    // Checks if player died or finished all rooms
+    void showGameResult();   // Shows win / lose screen
 
-    // Save&Load
-    bool save();
-    bool load();
+    // Save / Load (JSON format)
+    bool saveGame(Game&, Player&);         // Saves current progress to data/save.json
+    bool loadGame(Game&, Player&);         // Loads saved game from data/save.json
 };
 
-// Utility functions (can be in utils.h separately if needed)
-namespace GameUtils {
-    void clearScreen();
-    void pause();
-    int getRandom(int min, int max);
-    void printWithDelay(const std::string& text, int ms);
-}
-
-// Global constants
-const int MAX_ROOMS_EASY = 10;
-const int MAX_ROOMS_NORMAL = 15;
-const int MAX_ROOMS_HARD = 20;
-const float MOB_HP_MULTIPLIER[3] = { 0.8f, 1.0f, 1.3f };
-const int TRAP_DMG_MIN[3] = { 10, 15, 25 };
-const int TRAP_DMG_MAX[3] = { 20, 30, 40 };
-
-#endif // GAME_H
+#endif
