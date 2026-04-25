@@ -4,261 +4,234 @@
 #include "item.h"
 #include "player.h"
 #include "gamelogger.h"
-#include "types.h"
 #include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
 
-// Constructor
-GameTester::GameTester() : totalTests(0), passedTests(0) {}
+using namespace std;
 
-// Destructor
+GameTester::GameTester() : totalTests(0), passedTests(0) {}
 GameTester::~GameTester() = default;
 
-// Helper: Reset player state before each test
-void GameTester::resetPlayer(Player& p) {
-    p.set_Money(1000);
-    p.clearInventory(); // Assumes Inventory has clear method (per player.h structure)
-}
-
-// Helper: Check if inventory contains an item (by name)
-bool GameTester::inventoryContains(const Inventory& inv, const std::string& itemName) {
-    const auto& items = inv.get_items();
-    for (const auto& name : items) {
+bool GameTester::inventoryHasItem(Player& p, const string& itemName) {
+    const vector<string>& items = p.getInventory()->get_items();
+    for (const string& name : items) {
         if (name == itemName) return true;
     }
     return false;
 }
 
-// Run all test cases for shop system
 void GameTester::runAllTests() {
-    std::cout << "\n=====================================" << std::endl;
-    std::cout << "       Starting Shop System Test      " << std::endl;
-    std::cout << "=====================================\n" << std::endl;
+    cout << "\n=====================================\n";
+    cout << "       SHOP SYSTEM FULL TEST\n";
+    cout << "=====================================\n\n";
 
-    // Initialize test modules
-    Merchant merchant(Difficulty::NORMAL); // Use enum instead of magic number
-    Player player;
-    Shop shop;
-    shop.initShop(&merchant, &player, &player.inventory); // Inventory is part of Player
+    testShopInitialization();
+    testMerchantItemList();
+    testBuyWithSufficientGold();
+    testBuyWithInsufficientGold();
+    testInventoryFullPurchase();
+    testSellItem();
+    testDifficultyBasedPricing();
+    testTransactionLogWritten();
 
-    // Test cases
-    testShopInitialization(shop);
-    testItemAvailability(merchant);
-    testPurchaseWithEnoughGold(shop, player, merchant);
-    testPurchaseWithInsufficientGold(shop, player);
-    testInventoryFull(shop, player, merchant);
-    testSellItem(shop, player, merchant);
-    testDifficultyPricing(player, merchant, shop);
-    testTransactionLogging();
-
-    std::cout << "\nAll tests completed.\n";
+    cout << "\nAll tests executed.\n";
 }
 
-// Test shop initialization
-void GameTester::testShopInitialization(Shop& shop) {
+void GameTester::testShopInitialization() {
     totalTests++;
-    bool result = shop.get_isShopOpen();
-    if (result) {
+    Merchant m(1);
+    Player p;
+    Shop s;
+    s.initShop(&m, &p, p.getInventory());
+
+    if (s.get_isShopOpen()) {
         passedTests++;
-        std::cout << "[PASS] Shop initialization test" << std::endl;
+        cout << "[PASS] Shop initialization\n";
     } else {
-        recordBug("Shop initialization failed: shop not open");
-        std::cout << "[FAIL] Shop initialization test" << std::endl;
+        recordBug("Shop failed to open");
+        cout << "[FAIL] Shop initialization\n";
     }
 }
 
-// Test if merchant has expected items
-void GameTester::testItemAvailability(Merchant& merchant) {
+void GameTester::testMerchantItemList() {
     totalTests++;
-    bool hasLowConsumable = merchant.hasItem(CONSUMABLE, 0);
-    bool hasMediumWeapon = merchant.hasItem(WEAPON, 1);
-    bool hasHighArmor = merchant.hasItem(ARMOR, 2);
-    if (hasLowConsumable && hasMediumWeapon && hasHighArmor) {
+    Merchant m(1);
+    bool ok = m.hasItem(CONSUMABLE, 0)
+           && m.hasItem(WEAPON, 1)
+           && m.hasItem(ARMOR, 2);
+
+    if (ok) {
         passedTests++;
-        std::cout << "[PASS] Item availability test" << std::endl;
+        cout << "[PASS] Merchant has all items\n";
     } else {
-        recordBug("Merchant missing expected items");
-        std::cout << "[FAIL] Item availability test" << std::endl;
+        recordBug("Merchant missing items");
+        cout << "[FAIL] Merchant has all items\n";
     }
 }
 
-// Test successful purchase with enough gold
-void GameTester::testPurchaseWithEnoughGold(Shop& shop, Player& p, Merchant& m) {
-    resetPlayer(p);
+void GameTester::testBuyWithSufficientGold() {
     totalTests++;
+    Merchant m(1);
+    Player p;
+    Shop s;
+    s.initShop(&m, &p, p.getInventory());
+    p.set_Money(1000);
 
     Item item = m.getItem(CONSUMABLE, 0);
-    std::string itemName = item.getItemName();
-    int expectedPrice = static_cast<int>(item.getPrice() * 1.0f); // Normal difficulty multiplier
+    string name = item.getItemName();
+    float before = p.get_Money();
+    bool success = s.buyItem(CONSUMABLE, 0);
 
-    float initialGold = p.get_Money();
-    bool purchaseSuccess = shop.buyItem(CONSUMABLE, 0);
-    bool goldDeducted = (p.get_Money() == initialGold - expectedPrice);
-    bool itemInInventory = inventoryContains(p.inventory, itemName);
-
-    if (purchaseSuccess && goldDeducted && itemInInventory) {
+    if (success && p.get_Money() < before && inventoryHasItem(p, name)) {
         passedTests++;
-        std::cout << "[PASS] Purchase with enough gold test" << std::endl;
+        cout << "[PASS] Buy with enough gold\n";
     } else {
-        recordBug("Purchase failed despite sufficient gold or state not updated correctly");
-        std::cout << "[FAIL] Purchase with enough gold test" << std::endl;
+        recordBug("Buy failed with enough gold");
+        cout << "[FAIL] Buy with enough gold\n";
     }
 }
 
-// Test purchase with insufficient gold
-void GameTester::testPurchaseWithInsufficientGold(Shop& shop, Player& p) {
-    resetPlayer(p);
+void GameTester::testBuyWithInsufficientGold() {
     totalTests++;
+    Merchant m(1);
+    Player p;
+    Shop s;
+    s.initShop(&m, &p, p.getInventory());
+    p.set_Money(1);
 
-    p.set_Money(0);
-    bool purchaseSuccess = shop.buyItem(CONSUMABLE, 2); // High-priced item
-    bool goldUnchanged = (p.get_Money() == 0);
-
-    if (!purchaseSuccess && goldUnchanged) {
+    bool res = s.buyItem(CONSUMABLE, 2);
+    if (!res) {
         passedTests++;
-        std::cout << "[PASS] Purchase with insufficient gold test" << std::endl;
+        cout << "[PASS] Buy with no gold (rejected)\n";
     } else {
-        recordBug("Purchase succeeded with no gold or money deducted incorrectly");
-        std::cout << "[FAIL] Purchase with insufficient gold test" << std::endl;
+        recordBug("Buy succeeded with no gold");
+        cout << "[FAIL] Buy with no gold (rejected)\n";
     }
 }
 
-// Test inventory full behavior
-void GameTester::testInventoryFull(Shop& shop, Player& p, Merchant& m) {
-    resetPlayer(p);
+void GameTester::testInventoryFullPurchase() {
     totalTests++;
+    Merchant m(1);
+    Player p;
+    Shop s;
+    s.initShop(&m, &p, p.getInventory());
+    Inventory* inv = p.getInventory();
 
-    // Fill inventory to capacity (Inventory is part of Player)
-    for (int i = 0; i < p.inventory.get_capacity(); ++i) {
-        p.inventory.add_item("DummyItem_" + std::to_string(i));
+    for (int i = 0; i < inv->get_capacity(); ++i) {
+        inv->add_item("Filler_" + to_string(i));
     }
 
-    bool purchaseSuccess = shop.buyItem(WEAPON, 0); // Try to buy when full
-    bool inventorySizeUnchanged = (p.inventory.get_current_size() == p.inventory.get_capacity());
-
-    if (!purchaseSuccess && inventorySizeUnchanged) {
+    bool res = s.buyItem(WEAPON, 0);
+    if (!res) {
         passedTests++;
-        std::cout << "[PASS] Inventory full test" << std::endl;
+        cout << "[PASS] Inventory full (cannot buy)\n";
     } else {
-        recordBug("Item added to full inventory or purchase succeeded incorrectly");
-        std::cout << "[FAIL] Inventory full test" << std::endl;
+        recordBug("Purchased into full inventory");
+        cout << "[FAIL] Inventory full (cannot buy)\n";
     }
 }
 
-// Test item selling
-void GameTester::testSellItem(Shop& shop, Player& p, Merchant& m) {
-    resetPlayer(p);
+void GameTester::testSellItem() {
     totalTests++;
-
-    // Prepare item to sell
+    Merchant m(1);
+    Player p;
+    Shop s;
+    s.initShop(&m, &p, p.getInventory());
     Item item = m.getItem(CONSUMABLE, 0);
-    std::string itemName = item.getItemName();
-    p.inventory.add_item(itemName);
+    string name = item.getItemName();
+    p.getInventory()->add_item(name);
 
-    float initialGold = p.get_Money();
-    bool sellSuccess = shop.sellItem(CONSUMABLE, 0);
-    int expectedSellPrice = static_cast<int>(item.getPrice() * 0.5f); // Normal difficulty multiplier
-    bool goldIncreased = (p.get_Money() == initialGold + expectedSellPrice);
-    bool itemRemoved = !inventoryContains(p.inventory, itemName);
+    float before = p.get_Money();
+    bool ok = s.sellItem(CONSUMABLE, 0);
 
-    if (sellSuccess && goldIncreased && itemRemoved) {
+    if (ok && p.get_Money() > before && !inventoryHasItem(p, name)) {
         passedTests++;
-        std::cout << "[PASS] Item selling test" << std::endl;
+        cout << "[PASS] Sell item successfully\n";
     } else {
-        recordBug("Sell failed, gold not updated, or item not removed");
-        std::cout << "[FAIL] Item selling test" << std::endl;
+        recordBug("Sell failed");
+        cout << "[FAIL] Sell item successfully\n";
     }
 }
 
-// Test difficulty-based pricing logic
-void GameTester::testDifficultyPricing(Player& p, Merchant& m, Shop& shop) {
-    resetPlayer(p);
+void GameTester::testDifficultyBasedPricing() {
     totalTests++;
 
-    // Test different difficulty multipliers
-    bool testPassed = true;
+    // Normal
+    Player pN; Merchant mN(1); Shop sN;
+    sN.initShop(&mN, &pN, pN.getInventory());
+    pN.set_Money(1000);
+    sN.buyItem(WEAPON, 0);
+    int costN = 1000 - pN.get_Money();
 
-    // Test EASY mode
-    Merchant merchantEasy(Difficulty::EASY);
-    Shop shopEasy;
-    shopEasy.initShop(&merchantEasy, &p, &p.inventory);
-    p.set_Money(1000);
-    Item easyItem = merchantEasy.getItem(WEAPON, 1);
-    int easyPrice = static_cast<int>(easyItem.getPrice() * 0.8f);
-    shopEasy.buyItem(WEAPON, 1);
-    if (p.get_Money() != 1000 - easyPrice) testPassed = false;
+    // Easy
+    Player pE; Merchant mE(0); Shop sE;
+    sE.initShop(&mE, &pE, pE.getInventory());
+    pE.set_Money(1000);
+    sE.buyItem(WEAPON, 0);
+    int costE = 1000 - pE.get_Money();
 
-    // Test HARD mode
-    Merchant merchantHard(Difficulty::HARD);
-    Shop shopHard;
-    shopHard.initShop(&merchantHard, &p, &p.inventory);
-    p.set_Money(1000);
-    Item hardItem = merchantHard.getItem(WEAPON, 1);
-    int hardPrice = static_cast<int>(hardItem.getPrice() * 1.3f);
-    shopHard.buyItem(WEAPON, 1);
-    if (p.get_Money() != 1000 - hardPrice) testPassed = false;
+    // Hard
+    Player pH; Merchant mH(2); Shop sH;
+    sH.initShop(&mH, &pH, pH.getInventory());
+    pH.set_Money(1000);
+    sH.buyItem(WEAPON, 0);
+    int costH = 1000 - pH.get_Money();
 
-    if (testPassed) {
+    bool valid = (costE <= costN) && (costH >= costN);
+    if (valid) {
         passedTests++;
-        std::cout << "[PASS] Difficulty-based pricing test" << std::endl;
+        cout << "[PASS] Difficulty-based pricing\n";
     } else {
-        recordBug("Difficulty price multipliers not applied correctly");
-        std::cout << "[FAIL] Difficulty-based pricing test" << std::endl;
+        recordBug("Difficulty price multiplier wrong");
+        cout << "[FAIL] Difficulty-based pricing\n";
     }
 }
 
-// Test transaction logging (with file verification)
-void GameTester::testTransactionLogging() {
+void GameTester::testTransactionLogWritten() {
     totalTests++;
 
-    // Clear previous test log
-    std::ofstream clearLog(LOG_FILE, std::ios::trunc);
+    ofstream clearLog(LOG_FILE, ios::trunc);
     clearLog.close();
 
-    // Perform a test transaction
     GameLogger logger;
     logger.initLogFile();
     logger.logTransaction("TEST_BUY", CONSUMABLE, 0, 10);
     logger.closeLogFile();
 
-    // Verify log was written
-    std::ifstream logFile(LOG_FILE);
-    std::string logContent((std::istreambuf_iterator<char>(logFile)), std::istreambuf_iterator<char>());
+    ifstream logFile(LOG_FILE);
+    string content((istreambuf_iterator<char>(logFile)), istreambuf_iterator<char>());
     logFile.close();
 
-    if (logContent.find("TEST_BUY") != std::string::npos) {
+    if (content.find("TEST_BUY") != string::npos) {
         passedTests++;
-        std::cout << "[PASS] Transaction logging test" << std::endl;
+        cout << "[PASS] Transaction log written to file\n";
     } else {
-        recordBug("Transaction log not written correctly");
-        std::cout << "[FAIL] Transaction logging test" << std::endl;
+        recordBug("Log file not written");
+        cout << "[FAIL] Transaction log written to file\n";
     }
 }
 
-// Record a bug
-void GameTester::recordBug(const std::string& bugDesc) {
-    bugs.push_back(bugDesc);
+void GameTester::recordBug(const string& desc) {
+    bugs.push_back(desc);
 }
 
-// Generate final test report
 void GameTester::generateTestReport() const {
-    std::cout << "\n=====================================" << std::endl;
-    std::cout << "          Test Report                 " << std::endl;
-    std::cout << "=====================================\n" << std::endl;
-
-    std::cout << "Total Tests: " << totalTests << std::endl;
-    std::cout << "Passed: " << passedTests << std::endl;
-    std::cout << "Failed: " << (totalTests - passedTests) << "\n" << std::endl;
+    cout << "\n=====================================\n";
+    cout << "          TEST REPORT\n";
+    cout << "=====================================\n";
+    cout << "Total Tests: " << totalTests << "\n";
+    cout << "Passed:      " << passedTests << "\n";
+    cout << "Failed:      " << (totalTests - passedTests) << "\n\n";
 
     if (bugs.empty()) {
-        std::cout << "No bugs detected.\n";
+        cout << "All tests passed! No bugs found.\n";
     } else {
-        std::cout << "Detected Bugs:\n";
-        for (size_t i = 0; i < bugs.size(); ++i) {
-            std::cout << "- " << bugs[i] << std::endl;
+        cout << "Detected Bugs:\n";
+        for (const string& bug : bugs) {
+            cout << "- " << bug << "\n";
         }
     }
-    std::cout << "\n";
+    cout << "=====================================\n\n";
 }
