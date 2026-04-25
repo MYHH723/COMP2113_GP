@@ -1,4 +1,3 @@
-
 // game.h
 // Declaration of the Game class – controls the whole game flow.
 
@@ -56,5 +55,7 @@ public:
     void saveGame();         // Saves current progress to data/save.json
     void loadGame();         // Loads saved game from data/save.json
 };
+
+#endif
 
 #endif
