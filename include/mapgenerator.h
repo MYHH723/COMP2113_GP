@@ -33,16 +33,12 @@ public:
     // Getters
     std::vector<Room *> getGeneratedRooms() const;
     int getTotalRooms() const;
-    int getDifficulty() const;
     Room *getRoomById(int roomId);
 
     // Randomization
     bool shouldHaveShop(int roomNumber);
     int getRandomMonsterCount(int difficulty);
     int getRandomTrapCount(int difficulty);
-
-    // Utility
-    int countRoomsByType(RoomType type) const;
 };
 
 #endif // MAPGENERATOR_H
