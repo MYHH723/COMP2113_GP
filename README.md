@@ -20,10 +20,15 @@ This is a text-based roguelike game where players navigate through procedurally 
 
 ```
 COMP2113_GP/
-├── src/                      # Source code files
-│   └── player.cpp            # Player implementation
+├── src/.                    # Source code files
+│   ├── consoleUI.cpp.       # ConsoleUI
+│   ├── game.cpp.
+│   ├── main.cpp
+│   ├── room.cpp
+│   ├── savegame.cpp         # Progression saving
+│   └── player.cpp           # Player implementation
 │
-├── include/                  # Header files
+├── include/                 # Header files
 │   ├── game.h               # Game core control
 │   ├── player.h             # Player, Inventory, Panel classes
 │   ├── room.h               # Room management
@@ -36,7 +41,7 @@ COMP2113_GP/
 │   ├── shop.h               # Shop transactions
 │   ├── gamelogger.h         # Transaction logging
 │   ├── gametester.h         # Testing framework
-│   └── consoleUI.h.         # Generate Console Window UI
+│   └── consoleUI.h         # Generate Console Window UI
 │
 ├── data/                     # Game data storage
 │   └── save.json            # Player save file (auto-generated)
