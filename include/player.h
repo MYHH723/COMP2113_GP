@@ -6,6 +6,7 @@
 #include <list>
 #include <vector>
 #include "item.h"
+#include <nlohmann/json.hpp>
 
 // Player class - manages player character attributes and inventory
 class Player {
@@ -49,7 +50,9 @@ public:
     void show_items() const;
     void sort_items();
     std::string itemToString(const Item& item);
-    Inventory* getInventory() const { return inventory; }
+
+    nlohmann::json toJson() const;
+    void fromJson(const nlohmann::json& j);
 
 };
 
