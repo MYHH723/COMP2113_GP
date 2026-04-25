@@ -166,3 +166,15 @@ void Room::setRoomType(RoomType type)
 {
     roomType = type;
 }
+
+// Create monsters
+for (int i = 0; i < monsterCount; i++)
+{
+    monsters.push_back(new Monster(diff)); // Example constructor
+}
+
+// Create traps
+for (int i = 0; i < trapCount; i++)
+{
+    traps.push_back(new Trap(diff)); // Example constructor
+}
