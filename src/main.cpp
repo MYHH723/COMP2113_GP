@@ -1,4 +1,4 @@
-#include "game.h"
+/*#include "game.h"
 #include "player.h"
 #include <iostream>
 #include <string>
@@ -53,4 +53,15 @@ int main()
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
+}*/
+
+#include "game.h"
+using namespace std;
+
+// Main function: Program entry point
+int main() {
+    Game game;
+    game.showMainMenu();
+    game.gameLoop();
+    return 0;
 }
