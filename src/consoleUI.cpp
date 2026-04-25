@@ -1,7 +1,7 @@
 #include <iostream>
 #include "consoleUI.h"
 
-void consoleUI::showMainMenu()
+void ConsoleUI::showMainMenu()
 {
     std::cout << "=============================\n";
     std::cout << " Sword Magic Dungeon Adventure\n";
@@ -11,7 +11,7 @@ void consoleUI::showMainMenu()
     std::cin.get();
 }
 
-void consoleUI::showPlayerStatus(const Player &player)
+void ConsoleUI::showPlayerStatus(const Player &player)
 {
     std::cout << "\n=== Player Status ===\n";
     std::cout << "ATK: " << player.get_ATK() << "\n";
@@ -24,7 +24,7 @@ void consoleUI::showPlayerStatus(const Player &player)
     std::cout << "Stunned: " << (player.get_isStunned() ? "Yes" : "No") << "\n";
 }
 
-void consoleUI::showInventory(const Player &player)
+void ConsoleUI::showInventory(const Player &player)
 {
     std::cout << "\n=== Inventory ===\n";
 
