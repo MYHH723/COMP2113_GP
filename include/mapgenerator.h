@@ -6,16 +6,17 @@
 #include <vector>
 #include <string>
 
-// Forward declaration
-class Room;
-
-// MapGenerator class - generates rooms and handles room layout
-class MapGenerator {
+class MapGenerator
+{
 private:
     int totalRooms;
     int difficulty;
-    std::vector<Room*> generatedRooms;
-    int shopFrequency;  // How often shops appear
+    std::vector<Room *> generatedRooms;
+    int shopFrequency;
+
+    // Private helper methods
+    bool isBossRoom(int roomNumber);
+    bool isLastRoom(int roomNumber);
 
 public:
     MapGenerator();
@@ -26,22 +27,21 @@ public:
 
     // Map/Room generation
     void generateMap();
-    Room* generateRoom(int roomId, int roomNumber);
-    void determineRoomType(Room* room, int roomNumber);
-
+    Room *generateRoom(int roomId, int roomNumber);
     RoomType determineRoomType(int roomNumber);
 
     // Getters
-    std::vector<Room*> getGeneratedRooms() const;
+    std::vector<Room *> getGeneratedRooms() const;
     int getTotalRooms() const;
     int getDifficulty() const;
-    Room* getRoomById(int roomId);
+    Room *getRoomById(int roomId);
 
     // Randomization
     bool shouldHaveShop(int roomNumber);
     int getRandomMonsterCount(int difficulty);
     int getRandomTrapCount(int difficulty);
 
+    // Utility
     int countRoomsByType(RoomType type) const;
 };
 
