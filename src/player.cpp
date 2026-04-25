@@ -3,7 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 // Inventory implementation
 Inventory::Inventory() : capacity(MAX_INVENTORY_SIZE) {}
@@ -299,3 +300,57 @@ std::string Player::itemToString(const Item &item)
            std::to_string(item.getOriginalPurchasePrice()) + ":" + (item.isConsumableItem() ? "true" : "false");
 }
 
+json Player::toJson() const {
+    json j;
+    
+    // === Stats (from state map) ===
+    j["stats"]["ATK"] = get_ATK();
+    j["stats"]["DEF"] = get_DEF();
+    j["stats"]["HP"] = get_HP();
+    j["stats"]["EXP"] = get_EXP();
+    j["stats"]["Money"] = get_Money();
+    
+    // === Status flags ===
+    j["status"]["isAlive"] = isAlive;
+    j["status"]["isPoisoned"] = isPoisoned;
+    j["status"]["isStunned"] = isStunned;
+    
+    // === Inventory (preserve your exact string format) ===
+    j["inventory"] = json::array();
+    for (const auto& itemStr : inventory->get_items()) {
+        j["inventory"].push_back(itemStr);  // "SWORD:2:Iron Blade:25:150:150:false"
+    }
+    
+    return j;
+}
+
+void Player::fromJson(const json& j) {
+    // === Load stats ===
+    if (j.contains("stats")) {
+        const auto& stats = j["stats"];
+        if (stats.contains("ATK")) state["ATK"] = stats["ATK"].get<float>();
+        if (stats.contains("DEF")) state["DEF"] = stats["DEF"].get<float>();
+        if (stats.contains("HP")) {
+            state["HP"] = stats["HP"].get<float>();
+            if (state["HP"] <= 0) isAlive = false;  // Sync alive flag
+        }
+        if (stats.contains("EXP")) state["EXP"] = stats["EXP"].get<float>();
+        if (stats.contains("Money")) state["Money"] = stats["Money"].get<float>();
+    }
+    
+    // === Load status flags ===
+    if (j.contains("status")) {
+        const auto& status = j["status"];
+        if (status.contains("isAlive")) isAlive = status["isAlive"].get<bool>();
+        if (status.contains("isPoisoned")) isPoisoned = status["isPoisoned"].get<bool>();
+        if (status.contains("isStunned")) isStunned = status["isStunned"].get<bool>();
+    }
+    
+    // === Load inventory (clear first, then restore) ===
+    if (j.contains("inventory") && j["inventory"].is_array()) {
+        inventory->clear_items();  // Requires public helper (see Step 3)
+        for (const auto& itemStr : j["inventory"]) {
+            inventory->add_item(itemStr.get<std::string>());  // Reuse existing format
+        }
+    }
+}

@@ -2,10 +2,12 @@
 #ifndef SAVEGAME_H
 #define SAVEGAME_H
 
-class Player;
-class Game;
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
-bool saveGame(const Game& game, const Player& player);
-bool loadGame(Game& game, Player& player);
+class Game;  
+
+bool saveGame();
+bool loadGame();
 
 #endif 

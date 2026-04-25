@@ -53,8 +53,8 @@ public:
     void showGameResult();   // Shows win / lose screen
 
     // Save / Load (JSON format)
-    bool saveGame(Game&, Player&);         // Saves current progress to data/save.json
-    bool loadGame(Game&, Player&);         // Loads saved game from data/save.json
+    void saveGame();         // Saves current progress to data/save.json
+    void loadGame();         // Loads saved game from data/save.json
 };
 
 #endif
