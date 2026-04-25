@@ -58,6 +58,9 @@ public:
     void setClearedRooms(const std::vector<int>& clearedIds);
     void setRandomSeed(unsigned seed);//for reproducible generation
     
+    // Save&Load
+    bool save();
+    bool load();
 };
 
 // Utility functions (can be in utils.h separately if needed)

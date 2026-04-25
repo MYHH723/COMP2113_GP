@@ -4,31 +4,6 @@
 #include <fstream>
 #include <algorithm>
 
-static void printWindow(const std::string &title, const std::vector<std::string> &lines, int width = 60)
-{
-    if (width < 20)
-        width = 20;
-    std::string separator(width - 2, '-');
-
-    std::cout << "+" << separator << "+\n";
-    std::string titleLine = "| " + title;
-    if (titleLine.size() > (size_t)width - 1)
-        titleLine = titleLine.substr(0, width - 3) + "...";
-    titleLine += std::string(width - 1 - titleLine.size(), ' ') + "|\n";
-    std::cout << titleLine;
-    std::cout << "+" << separator << "+\n";
-
-    for (const auto &line : lines)
-    {
-        std::string content = "| " + line;
-        if (content.size() > (size_t)width - 1)
-            content = content.substr(0, width - 4) + "...";
-        content += std::string(width - 1 - content.size(), ' ') + "|\n";
-        std::cout << content;
-    }
-
-    std::cout << "+" << separator << "+\n";
-}
 
 // Inventory implementation
 Inventory::Inventory() : capacity(MAX_INVENTORY_SIZE) {}
@@ -324,12 +299,3 @@ std::string Player::itemToString(const Item &item)
            std::to_string(item.getOriginalPurchasePrice()) + ":" + (item.isConsumableItem() ? "true" : "false");
 }
 
-void Player::save()
-{
-    saveGame(*this); // Delegate to modular implementation
-}
-
-void Player::load_save()
-{
-    loadGame(*this); // Delegate to modular implementation
-}

@@ -49,12 +49,8 @@ public:
     void show_items() const;
     void sort_items();
     std::string itemToString(const Item& item);
+    Inventory* getInventory() const { return inventory; }
 
-    // Save/Load
-    void save();
-    void load_save();
-    friend void saveGame(const Player& );
-    friend void loadGame(Player& );
 };
 
 // Panel class - displays player attributes and inventory
