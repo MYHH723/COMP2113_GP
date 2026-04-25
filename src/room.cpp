@@ -4,6 +4,7 @@
 #include "monster.h"
 #include "trap.h"
 #include "player.h"
+#include <cstdlib>
 
 // Constructor
 Room::Room()
