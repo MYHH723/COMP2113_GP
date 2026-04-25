@@ -79,8 +79,89 @@ std::string Room::showRoomInfo() const
     std::stringstream ss;
     ss << "Room ID: " << roomId << "\n";
     ss << "Difficulty: " << difficulty << "\n";
-    ss << "Type: " << roomType << "\n";
-    ss << "Monsters: " << monsters.size() << "\n";
+    ss << "Type: ";
+    switch (roomType)
+    {
+    case NORMAL:
+        ss << "Normal";
+        break;
+    case BOSS:
+        ss << "Boss";
+        break;
+    case SHOP:
+        ss << "Shop";
+        break;
+    case TREASURE:
+        ss << "Treasure";
+        break;
+    }
+    ss << "\nMonsters: " << monsters.size() << "\n";
     ss << "Traps: " << traps.size() << "\n";
+    ss << "Shop: " << (hasShop ? "Yes" : "No") << "\n";
+    ss << "Cleared: " << (isCleared ? "Yes" : "No") << "\n";
     return ss.str();
+}
+
+// Room management
+bool Room::clearRoom()
+{
+    isCleared = true;
+    return true;
+}
+
+bool Room::isRoomCleared() const
+{
+    return isCleared;
+}
+
+bool Room::hasShopInRoom() const
+{
+    return hasShop;
+}
+
+// Getters
+RoomType Room::getRoomType() const
+{
+    return roomType;
+}
+
+int Room::getRoomId() const
+{
+    return roomId;
+}
+
+int Room::getDifficulty() const
+{
+    return difficulty;
+}
+
+std::vector<Monster *> Room::getMonsters() const
+{
+    return monsters;
+}
+
+std::vector<Trap *> Room::getTraps() const
+{
+    return traps;
+}
+
+std::string Room::getDescription() const
+{
+    return description;
+}
+
+// Setters
+void Room::setCleared(bool cleared)
+{
+    isCleared = cleared;
+}
+
+void Room::setHasShop(bool shop)
+{
+    hasShop = shop;
+}
+
+void Room::setRoomType(RoomType type)
+{
+    roomType = type;
 }
