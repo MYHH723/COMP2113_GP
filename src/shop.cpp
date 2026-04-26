@@ -17,7 +17,6 @@ Shop::Shop() {
 
 // Destructor
 Shop::~Shop() {
-    // No raw pointer deletion; owned by other modules
     merchant = nullptr;
     player = nullptr;
     inventory = nullptr;
@@ -33,7 +32,7 @@ void Shop::initShop(Merchant* m, Player* p, Inventory* inv) {
 
 // Calculate selling price with discount
 int Shop::calculateSellPrice(const Item& item) {
-    int basePrice = item.getOriginalPurchasePrice();
+    int basePrice = item.getPrice();
     return static_cast<int>(basePrice * sellDiscount);
 }
 
@@ -54,39 +53,31 @@ bool Shop::buyItem(ItemType type, int grade) {
         return false;
     }
 
-    // Get difficulty multiplier from merchant
-    Difficulty diff = merchant->getCurrentDiff();
+    int diff = merchant->getCurrentDiff();
     float priceMultiplier = 1.0f;
 
-    if (diff == Difficulty::EASY)      priceMultiplier = 0.8f;
-    if (diff == Difficulty::NORMAL)    priceMultiplier = 1.0f;
-    if (diff == Difficulty::HARD)      priceMultiplier = 1.3f;
+    if (diff == 0) priceMultiplier = 0.8f;
+    if (diff == 1) priceMultiplier = 1.0f;
+    if (diff == 2) priceMultiplier = 1.3f;
 
     Item item = merchant->getItem(type, grade);
     int basePrice = item.getPrice();
     int finalPrice = static_cast<int>(basePrice * priceMultiplier);
 
-    // Check player money
     if (player->get_Money() < finalPrice) {
         std::cout << "[Shop] Not enough gold." << std::endl;
         return false;
     }
 
-    // Inventory capacity check
     if (inventory->get_current_size() >= inventory->get_capacity()) {
         std::cout << "[Shop] Inventory is full." << std::endl;
         return false;
     }
 
-    // Deduct money
     player->change_Money(-finalPrice);
-    item.setOriginalPurchasePrice(finalPrice);
-
-    // Add item to inventory (Potion goes to inventory, NOT used immediately)
-    std::string itemName = item.getName();
+    std::string itemName = item.getItemName();
     inventory->add_item(itemName);
 
-    // Log transaction
     GameLogger logger;
     logger.initLogFile();
     logger.logTransaction("BUY", type, grade, finalPrice);
@@ -109,9 +100,8 @@ bool Shop::sellItem(ItemType type, int grade) {
     }
 
     Item item = merchant->getItem(type, grade);
-    std::string itemName = item.getName();
+    std::string itemName = item.getItemName();
 
-    // Check if inventory has the item
     bool hasItem = false;
     for (const std::string& name : inventory->get_items()) {
         if (name == itemName) {
@@ -125,21 +115,18 @@ bool Shop::sellItem(ItemType type, int grade) {
         return false;
     }
 
-    // Difficulty sell multiplier
-    Difficulty diff = merchant->getCurrentDiff();
+    int diff = merchant->getCurrentDiff();
     float sellMulti = 0.5f;
 
-    if (diff == Difficulty::EASY)      sellMulti = 0.4f;
-    if (diff == Difficulty::NORMAL)    sellMulti = 0.5f;
-    if (diff == Difficulty::HARD)      sellMulti = 0.6f;
+    if (diff == 0) sellMulti = 0.4f;
+    if (diff == 1) sellMulti = 0.5f;
+    if (diff == 2) sellMulti = 0.6f;
 
     int sellPrice = static_cast<int>(item.getPrice() * sellMulti);
 
-    // Remove item
     inventory->remove_item(itemName);
     player->change_Money(sellPrice);
 
-    // Log transaction
     GameLogger logger;
     logger.initLogFile();
     logger.logTransaction("SELL", type, grade, sellPrice);
@@ -149,10 +136,13 @@ bool Shop::sellItem(ItemType type, int grade) {
     return true;
 }
 
-// Show shop UI string
-std::string Shop::showShopUI() {
-    if (!merchant) return "Shop unavailable.";
-    return merchant->showGoodsList();
+// Display shop interface
+void Shop::showShopUI() {
+    if (!merchant) {
+        std::cout << "Shop unavailable." << std::endl;
+        return;
+    }
+    merchant->showGoodsList();
 }
 
 // Close shop
