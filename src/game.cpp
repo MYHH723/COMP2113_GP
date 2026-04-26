@@ -1,3 +1,4 @@
+#include "savegame.h"  
 // game.cpp
 // Implementation of the Game class.
 
@@ -236,6 +237,7 @@ void Game::showGameResult() {
     pause();
 }
 
+/*
 // ========== Save / Load (JSON) ==========
 void Game::saveGame() {
     json saveData;
@@ -289,4 +291,5 @@ void Game::loadGame() {
     std::cout << "Game loaded. Welcome back, " << playerName << "!\n";
     pause();
 }
+*/
 
