@@ -46,6 +46,7 @@ public:
     // Main game loop
     void gameLoop();         // Runs the core gameplay
     void enterNextRoom();    // Enters the next room and processes its event
+    void pause();
 
     // Game ending
     void checkGameOver();    // Checks if player died or finished all rooms
