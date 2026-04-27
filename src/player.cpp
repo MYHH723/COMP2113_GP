@@ -1,5 +1,7 @@
 #include "player.h"
 #include "savegame.h"
+#include "item.h"
+#include "types.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -16,6 +18,7 @@ bool Inventory::add_item(const std::string &itemName)
     if (items.size() < capacity)
     {
         items.push_back(itemName);
+        sort_items();
         return true;
     }
     return false;
@@ -32,40 +35,25 @@ bool Inventory::remove_item(const std::string &itemName)
     return false;
 }
 
+std::string Inventory::get_item(const std::string &itemName) {
+    auto it = std::find(items.begin(), items.end(), itemName);
+    if (it != items.end()) {
+        return *it;
+    }
+    return "";
+}
+
 bool Inventory::use_item(const std::string &itemName)
 {
     // Simple implementation: remove on use
     return remove_item(itemName);
 }
 
-void Inventory::show_items() const
-{
-    std::cout << "Inventory (" << items.size() << "/" << capacity << "):" << std::endl;
-    for (const auto &itemStr : items)
-    {
-        // Parse name from "Type:Grade:Name:..."
-        size_t pos1 = itemStr.find(':');
-        if (pos1 != std::string::npos)
-        {
-            size_t pos2 = itemStr.find(':', pos1 + 1);
-            if (pos2 != std::string::npos)
-            {
-                size_t pos3 = itemStr.find(':', pos2 + 1);
-                if (pos3 != std::string::npos)
-                {
-                    std::string name = itemStr.substr(pos2 + 1, pos3 - pos2 - 1);
-                    std::cout << "- " << name << std::endl;
-                }
-            }
-        }
-    }
-}
-
 void Inventory::sort_items()
 {
-    // Define type priorities: Sword > Armor > Potion
+    // Define type priorities: WEAPON > ARMOR > POTION
     std::map<std::string, int> typePriority = {
-        {"SWORD", 3},
+        {"WEAPON", 3},
         {"ARMOR", 2},
         {"POTION", 1}};
 
@@ -105,29 +93,6 @@ int Inventory::get_current_size() const
     return items.size();
 }
 
-// Panel implementation
-Panel::Panel() {}
-
-Panel::~Panel() {}
-
-void Player::show_status() 
-{
-    std::cout << "=== Player Status ===" << std::endl;
-    std::cout << "ATK: " << this->get_ATK() << std::endl;
-    std::cout << "DEF: " << this->get_DEF() << std::endl;
-    std::cout << "HP: " << this->get_HP() << std::endl;
-    std::cout << "EXP: " << this->get_EXP() << std::endl;
-    std::cout << "Money: " << this->get_Money() << std::endl;
-    std::cout << "Alive: " << (this->get_isAlive() ? "Yes" : "No") << std::endl;
-    std::cout << "Poisoned: " << (this->get_isPoisoned() ? "Yes" : "No") << std::endl;
-    std::cout << "Stunned: " << (this->get_isStunned() ? "Yes" : "No") << std::endl;
-}
-
-void Player::show_inventory()
-{
-    std::cout << "=== Inventory ===" << std::endl;
-    this->show_items();
-}
 
 
 // Player implementation
@@ -140,6 +105,9 @@ Player::Player(std::string name) : playerName(name)
     state["EXP"] = DEFAULT_EXP;
     state["Money"] = DEFAULT_MONEY;
     inventory = new Inventory();
+    maxHP = DEFAULT_HP;
+    equippedItems["WEAPON"] = "";
+    equippedItems["ARMOR"] = "";
     isAlive = true;
     isPoisoned = false;
     isStunned = false;
@@ -203,6 +171,10 @@ bool Player::get_isPoisoned() const
 bool Player::get_isStunned() const
 {
     return isStunned;
+}
+
+std::list<std::string> Player::get_all_items() const{
+    return inventory->get_items();
 }
 
 void Player::change_state(const std::string &key, float value)
@@ -282,11 +254,6 @@ void Player::use_item(const std::string &itemName)
     inventory->use_item(itemName);
 }
 
-void Player::show_items() const
-{
-    inventory->show_items();
-}
-
 void Player::sort_items()
 {
     inventory->sort_items();
@@ -322,6 +289,40 @@ void Player::level_up()
     }
     
 }
+
+void Player::equip_weapon(const std::string &itemName)
+{
+    std::string itemStr = inventory->get_item(itemName);
+    if(inventory->remove_item(itemName)) {
+        if (!equippedItems["WEAPON"].empty()) {
+            float oldEffect = parseEffectValue(equippedItems["WEAPON"]);
+            state["ATK"] -= oldEffect;
+            inventory->add_item(equippedItems["WEAPON"]);
+        }
+        equippedItems["WEAPON"] = itemStr;
+        float newEffect = parseEffectValue(itemStr);
+        state["ATK"] += newEffect;
+    }
+
+}
+
+void Player::equip_armor(const std::string &itemName)
+{
+    std::string itemStr = inventory->get_item(itemName);
+    if(inventory->remove_item(itemName)) {
+        if (!equippedItems["ARMOR"].empty()) {
+            float oldEffect = parseEffectValue(equippedItems["ARMOR"]);
+            state["DEF"] -= oldEffect;
+            inventory->add_item(equippedItems["ARMOR"]);
+        }
+        equippedItems["ARMOR"] = itemStr;
+        float newEffect = parseEffectValue(itemStr);
+        state["DEF"] += newEffect;
+    }
+
+}
+
+
 std::string Player::itemToString(const Item &item)
 {
     std::string typeStr;
@@ -330,16 +331,26 @@ std::string Player::itemToString(const Item &item)
     case ItemType::POTION:
         typeStr = "POTION";
         break;
-    case ItemType::SWORD:
-        typeStr = "SWORD";
+    case ItemType::WEAPON:
+        typeStr = "WEAPON";
         break;
     case ItemType::ARMOR:
         typeStr = "ARMOR";
         break;
     }
-    return typeStr + ":" + std::to_string(item.getGrade()) + ":" + item.getName() + ":" +
-           std::to_string(item.getEffectValue()) + ":" + std::to_string(item.getPrice()) + ":" +
-           std::to_string(item.getOriginalPurchasePrice()) + ":" + (item.isConsumableItem() ? "true" : "false");
+    return typeStr + ":" + std::to_string(item.getRarity()) + ":" + item.getName() + ":" +
+           std::to_string(item.getEffectValue()) + ":" + std::to_string(item.getPrice());
+}
+
+float Player::parseEffectValue(const std::string& itemStr) const {
+
+    size_t pos1 = itemStr.find(':');
+    size_t pos2 = itemStr.find(':', pos1 + 1);
+    size_t pos3 = itemStr.find(':', pos2 + 1);
+    size_t pos4 = itemStr.find(':', pos3 + 1);
+    
+    std::string effectStr = itemStr.substr(pos3 + 1, pos4 - pos3 - 1);
+    return std::stof(effectStr);
 }
 
 json Player::toJson() const {
@@ -364,6 +375,9 @@ json Player::toJson() const {
     for (const auto& itemStr : inventory->get_items()) {
         j["inventory"].push_back(itemStr);  // "SWORD:2:Iron Blade:25:150:150:false"
     }
+
+    j["equipped"]["WEAPON"] = equippedItems.at("WEAPON");
+    j["equipped"]["ARMOR"] = equippedItems.at("ARMOR");
     
     return j;
 }
@@ -394,9 +408,20 @@ void Player::fromJson(const json& j) {
     
     // === Load inventory (clear first, then restore) ===
     if (j.contains("inventory") && j["inventory"].is_array()) {
-        inventory->clear_items();  // Requires public helper (see Step 3)
+        inventory->clear_items();  
         for (const auto& itemStr : j["inventory"]) {
-            inventory->add_item(itemStr.get<std::string>());  // Reuse existing format
+            inventory->add_item(itemStr.get<std::string>());  
+        }
+    }
+    
+    // === Load equipped items ===
+    if (j.contains("equipped")) {
+        const auto& equipped = j["equipped"];
+        if (equipped.contains("WEAPON")) {
+            equippedItems["WEAPON"] = equipped["WEAPON"].get<std::string>();
+        }
+        if (equipped.contains("ARMOR")) {
+            equippedItems["ARMOR"] = equipped["ARMOR"].get<std::string>();
         }
     }
 }
