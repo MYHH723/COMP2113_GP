@@ -12,7 +12,7 @@ private:
     std::map<ItemType, std::array<Item, 3>> goods;  // 3 grades per item type
     int maxStockPerItem;
     bool isAvailable;
-    Difficulty currentDiff;
+    int currentDiff;
 
 public:
     Merchant();
@@ -20,7 +20,7 @@ public:
     ~Merchant();
 
     // Initialization
-    void initMerchant(Difficulty diff);
+    void initMerchant();
 
     // Goods management
     bool hasItem(ItemType type, int grade);

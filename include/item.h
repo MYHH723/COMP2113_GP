@@ -6,33 +6,20 @@
 // Forward declaration
 class Player;
 
-// Item type enumeration
-enum class ItemType {
-    POTION,
-    SWORD,
-    ARMOR
-};
-
-// Difficulty enumeration (used by items)
-enum class Difficulty {
-    EASY,
-    NORMAL,
-    HARD
-};
-
 // Item class - represents a single item
 class Item {
 private:
-    ItemType type;
-    int grade;              // 0=Level1, 1=Level2, 2=Level3
     std::string name;
-    int effectValue;
+    ItemType type;
+    ItemRarity rarity; 
+    float effectValue; // For potions: heal amount; for weapons: attack boost; for armor: defense boost
     int price;
-    int originalPurchasePrice;
-    bool isConsumable;
+    bool isConsumed;
 
 public:
     Item();
+    Item(const std::string name, ItemType type, ItemRarity rarity,
+           int cost, float effect, bool consumed = false);
     ~Item();
 
     // Initialization
@@ -40,18 +27,17 @@ public:
 
     // Getters
     ItemType getType() const;
-    int getGrade() const;
+    ItemRarity getRarity() const;
     std::string getName() const;
-    int getEffectValue() const;
+    float getEffectValue() const;
     int getPrice() const;
-    int getOriginalPurchasePrice() const;
-    bool isConsumableItem() const;
+    bool getIsConsumed() const;
+    void setIsConsumed(bool state);
 
-    // Setters
-    void setOriginalPurchasePrice(int price);
 
     // Item effects
     void applyEffect(Player& player);
+    void displayItemInfo() const;
 };
 
 // Global constants for items

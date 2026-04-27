@@ -2,5 +2,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 enum RoomType { NORMAL, BOSS, SHOP, TREASURE };
-enum ItemType { POTION, SWORD, ARMOR }; // etc.
+enum ItemType { POTION, WEAPON, ARMOR }; // etc.
+enum ItemRarity { LOW, MEDIUM, HIGH };
+enum Difficulty { EASY, NORMAL, HARD };
 #endif

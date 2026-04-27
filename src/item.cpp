@@ -1,33 +1,35 @@
 #include "item.h"
+#include "types.h"
 #include <iostream>
 #include <string>
+#include <iomanip>
 
 // Default constructor
 Item::Item()
-    : itemName(""), itemType(CONSUMABLE), itemRarity(LOW),
-      price(0), healAmount(0), attackBoost(0), defenseBoost(0),
+    : name(""), type(POTION), rarity(LOW),
+      price(0), effectValue(0.0),
       isConsumed(false) {}
 
 // Parameterized constructor
-Item::Item(const std::string& name, ItemType type, ItemRarity rarity,
-           int cost, int heal, int attack, int defense)
-    : itemName(name), itemType(type), itemRarity(rarity),
-      price(cost), healAmount(heal), attackBoost(attack), defenseBoost(defense),
-      isConsumed(false) {}
+Item::Item(const std::string name, ItemType type, ItemRarity rarity,
+           int cost, float effect, bool consumed)
+    : name(name), type(type), rarity(rarity),
+      price(cost), effectValue(effect),
+      isConsumed(consumed) {}
 
 // Get name of item
-std::string Item::getItemName() const {
-    return itemName;
+std::string Item::getName() const {
+    return name;
 }
 
 // Get item type (CONSUMABLE, WEAPON, ARMOR)
-ItemType Item::getItemType() const {
-    return itemType;
+ItemType Item::getType() const {
+    return type;
 }
 
 // Get item rarity (LOW, MEDIUM, HIGH)
-ItemRarity Item::getItemRarity() const {
-    return itemRarity;
+ItemRarity Item::getRarity() const {
+    return rarity;
 }
 
 // Get item price
@@ -35,19 +37,8 @@ int Item::getPrice() const {
     return price;
 }
 
-// Get heal amount
-int Item::getHealAmount() const {
-    return healAmount;
-}
-
-// Get attack boost value
-int Item::getAttackBoost() const {
-    return attackBoost;
-}
-
-// Get defense boost value
-int Item::getDefenseBoost() const {
-    return defenseBoost;
+float Item::getEffectValue() const {
+    return effectValue;
 }
 
 // Check if item is consumed
@@ -62,29 +53,36 @@ void Item::setIsConsumed(bool state) {
 
 // Display item information
 void Item::displayItemInfo() const {
-    std::cout << "Item: " << itemName << "\n";
-    std::cout << "Type: ";
+    std::cout << std::left;
+    std::cout << "Item: " + name;
+    std::cout << std::setw(20) << "Type: ";
 
     // Display type
-    switch (itemType) {
-        case CONSUMABLE: std::cout << "Consumable"; break;
-        case WEAPON: std::cout << "Weapon"; break;
-        case ARMOR: std::cout << "Armor"; break;
+    switch (type) {
+        case POTION: std::cout << "POTION"; break;
+        case WEAPON: std::cout << "WEAPON"; break;
+        case ARMOR: std::cout << "ARMOR"; break;
         default: std::cout << "Unknown"; break;
     }
 
-    std::cout << "\nRarity: ";
+    std::cout << std::setw(35) <<"Rarity: ";
 
     // Display rarity
-    switch (itemRarity) {
+    switch (rarity) {
         case LOW: std::cout << "Low"; break;
         case MEDIUM: std::cout << "Medium"; break;
         case HIGH: std::cout << "High"; break;
         default: std::cout << "Unknown"; break;
     }
 
-    std::cout << "\nPrice: " << price << " gold\n";
-    std::cout << "Heal: " << healAmount << "\n";
-    std::cout << "Attack: " << attackBoost << "\n";
-    std::cout << "Defense: " << defenseBoost << "\n\n";
+    std::cout << std::setw(50) << "Price: " + std::to_string(price) << std::setw(60);
+    switch (type) {
+        case POTION: std::cout << "Heal: " << effectValue << "\n"; break;
+        case WEAPON: std::cout << "Attack: " << effectValue << "\n"; break;
+        case ARMOR: std::cout << "Defense: " << effectValue << "\n"; break;
+        default: std::cout << "Unknown"; break;
+    }
+    
+    
+    
 }
