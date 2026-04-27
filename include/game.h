@@ -22,9 +22,9 @@ private:
     int currentRoomIndex;    // Index of the room the player is in (0-based)
     bool isRunning;          // True while the game is active
     bool playerWin;          // True if player cleared all rooms
-    
-    std::string playerName;  // Player's name
+
     Player* player;          // Player object (dynamically allocated)
+    std::string playerName;   // Name entered by the player
 
     // Map and rooms
     MapGenerator* mapGen;    // Generates the dungeon layout
