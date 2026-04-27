@@ -2,6 +2,7 @@
 #define MERCHANT_H
 
 #include "item.h"
+#include "types.h"
 #include <map>
 #include <array>
 #include <string>
@@ -12,7 +13,7 @@ private:
     std::map<ItemType, std::array<Item, 3>> goods;  // 3 grades per item type
     int maxStockPerItem;
     bool isAvailable;
-    Difficulty currentDiff;
+    int currentDiff;
 
 public:
     Merchant();
@@ -20,19 +21,20 @@ public:
     ~Merchant();
 
     // Initialization
-    void initMerchant(Difficulty diff);
+    void initMerchant();
 
     // Goods management
-    bool hasItem(ItemType type, int grade);
-    Item getItem(ItemType type, int grade);
-    std::string showGoodsList();
+    bool hasItem(ItemType type, ItemRarity rarity) const;
+    Item getItem(ItemType type, ItemRarity rarity);
+    void showGoodsList() const;
+    void restockGoods();
 
     // Availability
     bool getIsAvailable() const;
     void setIsAvailable(bool status);
 
     // Getters
-    Difficulty getCurrentDiff() const;
+    int getCurrentDiff() const;
 };
 
 // Global constants
