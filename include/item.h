@@ -38,6 +38,7 @@ public:
     // Item effects
     void applyEffect(Player& player);
     void displayItemInfo() const;
+    bool operator==(const Item& other) const;
 };
 
 // Global constants for items

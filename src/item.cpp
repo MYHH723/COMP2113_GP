@@ -83,6 +83,12 @@ void Item::displayItemInfo() const {
         default: std::cout << "Unknown"; break;
     }
     
-    
-    
+}
+
+bool Item::operator==(const Item& other) const {
+    return name == other.name &&
+           type == other.type &&
+           rarity == other.rarity &&
+           price == other.price &&
+           effectValue == other.effectValue;
 }

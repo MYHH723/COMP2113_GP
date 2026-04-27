@@ -1,4 +1,6 @@
 #include "gamelogger.h"
+#include "item.h"
+#include "types.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -34,7 +36,7 @@ void GameLogger::logTransaction(const std::string& action, ItemType type, int ra
     // Convert ItemType to string
     std::string typeStr;
     switch (type) {
-        case CONSUMABLE: typeStr = "Consumable"; break;
+        case POTION:     typeStr = "Potion"; break;
         case WEAPON:     typeStr = "Weapon";     break;
         case ARMOR:      typeStr = "Armor";      break;
         default:         typeStr = "Unknown";    break;

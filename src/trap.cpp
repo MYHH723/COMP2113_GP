@@ -4,7 +4,7 @@
 #include <random>
 #include <string>
 
-std::mt19937 Trap::gen(std::random_device{}());
+std::mt19937 gen(std::random_device{}());
 
 Trap::Trap() 
     : trapType(TrapType::SPIKE_PIT), damage_min(0), damage_max(0), 

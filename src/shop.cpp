@@ -75,7 +75,7 @@ bool Shop::buyItem(ItemType type, int grade) {
     }
 
     player->change_Money(-finalPrice);
-    std::string itemName = item.getItemName();
+    std::string itemName = item.getName();
     inventory->add_item(itemName);
 
     GameLogger logger;
@@ -100,7 +100,7 @@ bool Shop::sellItem(ItemType type, int grade) {
     }
 
     Item item = merchant->getItem(type, grade);
-    std::string itemName = item.getItemName();
+    std::string itemName = item.getName();
 
     bool hasItem = false;
     for (const std::string& name : inventory->get_items()) {

@@ -2,6 +2,8 @@
 #define SHOP_H
 
 #include "item.h"
+#include "types.h"
+#include "merchant.h"
 #include <string>
 
 // Forward declarations
@@ -33,7 +35,7 @@ public:
     int calculateSellPrice(const Item& item);
 
     // Shop UI
-    std::string showShopUI();
+    void showShopUI();
     void closeShop();
 
     // Getters

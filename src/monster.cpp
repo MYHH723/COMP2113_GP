@@ -5,7 +5,7 @@
 #include <string>
 #include <cmath>
 
-std::mt19937 Monster::gen(std::random_device{}());
+std::mt19937 gen(std::random_device{}());
 
 Monster::Monster() 
     : name(""), hp(0), maxHp(0), atk(0), def(0), 
