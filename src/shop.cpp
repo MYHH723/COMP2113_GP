@@ -23,10 +23,10 @@ Shop::~Shop() {
 }
 
 // Initialize shop with merchant, player, inventory
-void Shop::initShop(Merchant* m, Player* p, Inventory* inv) {
+void Shop::initShop(Merchant* m, Player* p) {
     this->merchant = m;
     this->player = p;
-    this->inventory = inv;
+    this->inventory = p->get_inventory();
     isShopOpen = true;
 }
 

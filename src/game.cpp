@@ -9,6 +9,7 @@
 #include "battlesystem.h"
 #include "shop.h"
 #include "utils.h"
+#include "merchant.h"
 
 #include <iostream>
 #include <fstream>
@@ -114,7 +115,7 @@ void Game::initGame() {
     player = new Player(playerName);
 
     // Create map generator
-    mapGen = new MapGenerator(totalRooms, difficulty);
+    mapGen = new MapGenerator();
 
     // Apply difficulty scaling (sets global modifiers for monsters/traps)
     applyDifficultyScaling();
@@ -139,7 +140,8 @@ void Game::applyDifficultyScaling() {
 void Game::generateRooms() {
     // Ask MapGenerator to build the whole dungeon.
     // The method generateAll() returns a vector of Room pointers.
-    rooms = mapGen->generateAll();
+    mapGen->initMapGenerator(totalRooms, difficulty);
+    rooms = mapGen->getGeneratedRooms();
 }
 
 // ========== Main Game Loop ==========
@@ -149,7 +151,7 @@ void Game::gameLoop() {
         std::cout << "\n===== Room " << (currentRoomIndex + 1) << " / " << totalRooms << " =====\n";
 
         // Show player status (using Player's display method)
-        player->display();
+        player->show_status();
 
         // Process the current room
         enterNextRoom();
@@ -173,26 +175,51 @@ void Game::enterNextRoom() {
     currentRoomIndex++;
 
     // Determine room type and act accordingly
-    RoomType type = currentRoom->getType();  // expects NORMAL, BOSS, SHOP, TREASURE
+    RoomType type = currentRoom->getRoomType();  // expects NORMAL, BOSS, SHOP, TREASURE
 
     switch (type) {
         case RoomType::NORMAL:
         case RoomType::BOSS: {
-            Monster* monster = currentRoom->getMonster();
-            BattleSystem battle(player, monster);
-            BattleResult result = battle.start();  // returns WIN, LOSE, or FLEE
-            if (result == BattleResult::LOSE) {
+            std::vector<Monster*> monsters = currentRoom->getMonsters();
+            BattleSystem* battle = new BattleSystem();
+            BattleResult result = BattleResult::ONGOING;
+            std::string battleLog;
+            for (auto monster : monsters)
+            {
+                battle->initBattle(player, monster);
+                battle->startBattle();
+                while(battle->get_isBattleActive())
+                {
+                    result = battle->executeBattleRound(); 
+                }
+                battle->endBattle();
+                if(result == BattleResult::PLAYER_LOSE) {
+                    break;  // player died, exit loop
+                }
+            }
+            result =  battle->getLastResult(); // returns WIN, LOSE, or FLEE
+            battleLog = battle->showBattleLog();
+            if (result == BattleResult::PLAYER_LOSE) {
                 isRunning = false;
                 playerWin = false;
                 return;
             }
+            else if (result == BattleResult::PLAYER_FLEE) {
+                playerWin = false;
+                std::cout << battleLog << std::endl;
+                battle->applyRewards(); 
+                return;
+            }
+            else if (result == BattleResult::PLAYER_WIN) {
+                playerWin = true;
+                std::cout << battleLog << std::endl;
+                battle->applyRewards(); 
+            }
             break;
         }
         case RoomType::SHOP: {
-            Shop* shop = currentRoom->getShop();
-            if (shop != nullptr) {
-                shop->enter(player);   // opens the shop menu
-            }
+            Shop* shop = new Shop();
+            shop->initShop(new Merchant(difficulty), player);
             break;
         }
         case RoomType::TREASURE: {
@@ -210,7 +237,7 @@ void Game::enterNextRoom() {
 
 // ========== Game End Logic ==========
 void Game::checkGameOver() {
-    if (player->getHP() <= 0) {
+    if (player->get_HP() <= 0) {
         isRunning = false;
         playerWin = false;
     } else if (currentRoomIndex >= totalRooms) {
@@ -233,7 +260,7 @@ void Game::showGameResult() {
         std::cout << "================================\n";
         std::cout << "You died in room " << currentRoomIndex << ".\n";
     }
-    player->display();
+    player->show_status();
     pause();
 }
 

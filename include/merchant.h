@@ -16,6 +16,7 @@ private:
 
 public:
     Merchant();
+    Merchant(int gameDiff);
     ~Merchant();
 
     // Initialization

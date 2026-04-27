@@ -22,8 +22,8 @@ private:
     int currentRoomIndex;    // Index of the room the player is in (0-based)
     bool isRunning;          // True while the game is active
     bool playerWin;          // True if player cleared all rooms
-
-    std::string playerName;  // Name entered by the player
+    
+    std::string playerName;  // Player's name
     Player* player;          // Player object (dynamically allocated)
 
     // Map and rooms
@@ -46,6 +46,7 @@ public:
     // Main game loop
     void gameLoop();         // Runs the core gameplay
     void enterNextRoom();    // Enters the next room and processes its event
+    void pause();
 
     // Game ending
     void checkGameOver();    // Checks if player died or finished all rooms
@@ -55,7 +56,5 @@ public:
     void saveGame();         // Saves current progress to data/save.json
     void loadGame();         // Loads saved game from data/save.json
 };
-
-#endif
 
 #endif

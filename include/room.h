@@ -51,7 +51,7 @@ public:
     void setRoomType(RoomType type);
 
     // Display
-    std::string showRoomInfo();
+    std::string showRoomInfo() const;
 };
 
 #endif // ROOM_H
