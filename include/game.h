@@ -24,6 +24,7 @@ private:
     bool playerWin;          // True if player cleared all rooms
 
     Player* player;          // Player object (dynamically allocated)
+    std::string playerName;   // Name entered by the player
 
     // Map and rooms
     MapGenerator* mapGen;    // Generates the dungeon layout
