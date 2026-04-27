@@ -110,41 +110,30 @@ Panel::Panel() {}
 
 Panel::~Panel() {}
 
-void Panel::show_status(const Player &player)
+void Player::show_status() 
 {
     std::cout << "=== Player Status ===" << std::endl;
-    std::cout << "ATK: " << player.get_ATK() << std::endl;
-    std::cout << "DEF: " << player.get_DEF() << std::endl;
-    std::cout << "HP: " << player.get_HP() << std::endl;
-    std::cout << "EXP: " << player.get_EXP() << std::endl;
-    std::cout << "Money: " << player.get_Money() << std::endl;
-    std::cout << "Alive: " << (player.get_isAlive() ? "Yes" : "No") << std::endl;
-    std::cout << "Poisoned: " << (player.get_isPoisoned() ? "Yes" : "No") << std::endl;
-    std::cout << "Stunned: " << (player.get_isStunned() ? "Yes" : "No") << std::endl;
+    std::cout << "ATK: " << this->get_ATK() << std::endl;
+    std::cout << "DEF: " << this->get_DEF() << std::endl;
+    std::cout << "HP: " << this->get_HP() << std::endl;
+    std::cout << "EXP: " << this->get_EXP() << std::endl;
+    std::cout << "Money: " << this->get_Money() << std::endl;
+    std::cout << "Alive: " << (this->get_isAlive() ? "Yes" : "No") << std::endl;
+    std::cout << "Poisoned: " << (this->get_isPoisoned() ? "Yes" : "No") << std::endl;
+    std::cout << "Stunned: " << (this->get_isStunned() ? "Yes" : "No") << std::endl;
 }
 
-void Panel::show_inventory(const Player &player)
+void Player::show_inventory()
 {
     std::cout << "=== Inventory ===" << std::endl;
-    player.show_items();
+    this->show_items();
 }
 
-void Panel::show_condition(const Player &player)
-{
-    std::cout << "=== Condition ===" << std::endl;
-    std::cout << "Alive: " << (player.get_isAlive() ? "Yes" : "No") << std::endl;
-    std::cout << "Poisoned: " << (player.get_isPoisoned() ? "Yes" : "No") << std::endl;
-    std::cout << "Stunned: " << (player.get_isStunned() ? "Yes" : "No") << std::endl;
-}
-
-void Panel::show_message(const std::string &message)
-{
-    std::cout << "Message: " << message << std::endl;
-}
 
 // Player implementation
-Player::Player()
+Player::Player(std::string name) : playerName(name)
 {
+    state["LEVEL"] = 1;
     state["ATK"] = DEFAULT_ATK;
     state["DEF"] = DEFAULT_DEF;
     state["HP"] = DEFAULT_HP;
@@ -164,6 +153,11 @@ Player::~Player()
 std::map<std::string, float> Player::get_state() const
 {
     return state;
+}
+
+int Player::get_Level() const
+{
+    return static_cast<int>(state.at("LEVEL"));
 }
 
 float Player::get_ATK() const
@@ -189,6 +183,11 @@ float Player::get_EXP() const
 float Player::get_Money() const
 {
     return state.at("Money");
+}
+
+float Player::get_maxHP() const
+{
+    return maxHP;
 }
 
 bool Player::get_isAlive() const
@@ -224,6 +223,10 @@ void Player::change_DEF(float amount)
 void Player::change_HP(float amount)
 {
     state["HP"] += amount;
+    if (state["HP"] > maxHP)
+    {
+        state["HP"] = maxHP;
+    }
     if (state["HP"] <= 0)
     {
         isAlive = false;
@@ -233,6 +236,15 @@ void Player::change_HP(float amount)
 void Player::change_EXP(float amount)
 {
     state["EXP"] += amount;
+    int level = state.at("LEVEL");
+    float exp = state.at("EXP");
+    while(exp >= 100 * std::pow(1.1, level - 1)) {
+        exp -= 100 * std::pow(1.1, level - 1); 
+        level++;
+        level_up();
+    }
+    state["LEVEL"] = level;
+    state["EXP"] = exp;
 }
 
 void Player::change_Money(float amount)
@@ -280,6 +292,36 @@ void Player::sort_items()
     inventory->sort_items();
 }
 
+void Player::level_up()
+{
+    std::cout << "Level Up! You are now level " << get_Level() << "!" << std::endl;
+    for(int time = get_Level() + 1; time > 0; time--) {
+        std::cout << "Choose an attribute to increase: " << "(remaining " << time << " points)" << std::endl;
+        std::cout << "1. ATK" << std::endl;
+        std::cout << "2. DEF" << std::endl;
+        std::cout << "3. HP" << std::endl;
+
+        std::string choice;
+        while(std::cin >> choice) {
+            if (choice == "1" || choice == "ATK" || choice == "2" || choice == "DEF" || choice == "3" || choice == "HP") {
+                break;
+            }
+            std::cout << "Invalid choice. Please enter 1, 2, or 3." << std::endl;
+        }
+
+        if (choice == "1" || choice == "ATK") {
+            change_ATK(0.1*DEFAULT_ATK);
+        }
+        else if (choice == "2" || choice == "DEF") {
+            change_DEF(0.1*DEFAULT_DEF);
+        }
+        else if (choice == "3" || choice == "HP") {
+            maxHP += 0.1*DEFAULT_HP;
+            change_HP(0.1*DEFAULT_HP);
+        }
+    }
+    
+}
 std::string Player::itemToString(const Item &item)
 {
     std::string typeStr;
@@ -304,11 +346,13 @@ json Player::toJson() const {
     json j;
     
     // === Stats (from state map) ===
+    j["stats"]["LEVEL"] = get_Level();
     j["stats"]["ATK"] = get_ATK();
     j["stats"]["DEF"] = get_DEF();
     j["stats"]["HP"] = get_HP();
     j["stats"]["EXP"] = get_EXP();
     j["stats"]["Money"] = get_Money();
+    j["stats"]["maxHP"] = maxHP;
     
     // === Status flags ===
     j["status"]["isAlive"] = isAlive;
@@ -328,6 +372,7 @@ void Player::fromJson(const json& j) {
     // === Load stats ===
     if (j.contains("stats")) {
         const auto& stats = j["stats"];
+        if (stats.contains("LEVEL")) state["LEVEL"] = stats["LEVEL"].get<float>();
         if (stats.contains("ATK")) state["ATK"] = stats["ATK"].get<float>();
         if (stats.contains("DEF")) state["DEF"] = stats["DEF"].get<float>();
         if (stats.contains("HP")) {
@@ -336,6 +381,7 @@ void Player::fromJson(const json& j) {
         }
         if (stats.contains("EXP")) state["EXP"] = stats["EXP"].get<float>();
         if (stats.contains("Money")) state["Money"] = stats["Money"].get<float>();
+        if (stats.contains("maxHP")) maxHP = stats["maxHP"].get<float>();
     }
     
     // === Load status flags ===

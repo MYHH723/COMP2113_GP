@@ -52,10 +52,17 @@ void Game::loadGame() {
 
     // Recreate map generator and rooms
     delete mapGen;
-    mapGen = new MapGenerator(totalRooms, difficulty);
-    rooms = mapGen->generateAll();   // Note: room contents may differ from saved state
+    mapGen = new MapGenerator();
+    mapGen->initMapGenerator(totalRooms, difficulty);
+    mapGen->generateMap();   // Note: room contents may differ from saved state
+    rooms = mapGen->getGeneratedRooms();
 
     isRunning = true;
     std::cout << "Game loaded. Welcome back, " << playerName << "!\n";
     pause();
+}
+
+void Game::pause() {
+    std::cout << "Press any key to continue...";
+    std::cin.get();
 }

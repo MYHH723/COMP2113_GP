@@ -6,11 +6,11 @@
 #include <sstream>
 #include <iomanip>
 
-std::mt19937 BattleSystem::gen(std::random_device{}());
+std::mt19937 gen(std::random_device{}());
 
 BattleSystem::BattleSystem() 
     : player(nullptr), currentMonster(nullptr), round_count(0), 
-      isBattleActive(false), lastResult(BattleResult::ONGOING) {
+      isBattleActive(false), lastResult(BattleResult::ONGOING), reward{0, 0} {
     battleLog.clear();
     battleLog.push_back("Battle system initialized");
 }
@@ -26,7 +26,6 @@ void BattleSystem::initBattle(Player* p, Monster* m) {
     round_count = 0;
     isBattleActive = true;
     lastResult = BattleResult::ONGOING;
-    
     battleLog.clear();
     std::string log = "Battle started!";
     if (currentMonster) log += " Encounter: " + currentMonster->getName();
@@ -67,7 +66,7 @@ BattleResult BattleSystem::executeBattleRound() {
     if (!player || !currentMonster) {
         battleLog.push_back("Error: Player or monster missing");
         isBattleActive = false;
-        return BattleResult::PLAYER_LOSE;
+        return lastResult;
     }
     
     if (!currentMonster->get_isAlive()) {
@@ -86,7 +85,24 @@ BattleResult BattleSystem::executeBattleRound() {
     
     round_count++;
     battleLog.push_back("--- Round " + std::to_string(round_count) + " ---");
-    
+    std::uniform_int_distribution<> int_dist(1, player->get_HP());     
+    float dice = int_dist(gen)/DEFAULT_HP;  // Random float between 0 and 1 based on player's HP
+    if(dice < 0.1f) {
+        playerFlee();
+    } else if(dice < 0.2f) {
+        playerAttack();
+        if (currentMonster->get_isAlive()) {
+            monsterAttack();
+        }  
+    } else if(dice < 0.4f){
+        playerDefend();
+        monsterAttack();  
+    } else{
+        playerAttack();
+        if (currentMonster->get_isAlive()) {
+            monsterAttack();
+        }
+    }
     return lastResult;
 }
 
@@ -119,11 +135,14 @@ int BattleSystem::playerAttack() {
         battleLog.push_back("Defeated " + currentMonster->getName() + "!");
         isBattleActive = false;
         lastResult = BattleResult::PLAYER_WIN;
-        
-        player->change_EXP(static_cast<float>(currentMonster->getExpReward()));
-        player->change_Money(static_cast<float>(currentMonster->getGoldReward()));
+        float reward_exp = static_cast<float>(currentMonster->getExpReward());
+        float reward_gold = static_cast<float>(currentMonster->getGoldReward());
+        reward[0] += reward_exp;
+        reward[1] += reward_gold;
+        battleLog.push_back("Gained " + std::to_string(reward_exp) + " EXP and " + 
+                std::to_string(reward_gold) + " Gold");
     }
-    
+    battleLog.push_back("Monster remaining HP: " + std::to_string(currentMonster->getHP()));
     return actualDamage;
 }
 
@@ -139,7 +158,7 @@ int BattleSystem::monsterAttack() {
     }
     
     int damage = currentMonster->attackPlayer(*player);
-    
+    battleLog.push_back("Player remaining HP: " + std::to_string(player->get_HP()) + "/" + std::to_string(player->get_maxHP()));
     if (damage > 0) {
         battleLog.push_back(currentMonster->getName() + " attacks player, dealing " + 
                            std::to_string(damage) + " damage");
@@ -189,36 +208,6 @@ int BattleSystem::getRoundCount() const { return round_count; }
 bool BattleSystem::get_isBattleActive() const { return isBattleActive; }
 std::vector<std::string> BattleSystem::getBattleLog() const { return battleLog; }
 
-std::string BattleSystem::showBattleStatus() {
-    std::stringstream ss;
-    ss << "=== Battle Status ===" << std::endl;
-    
-    if (!isBattleActive) {
-        ss << "No active battle" << std::endl;
-        return ss.str();
-    }
-    
-    ss << "Round: " << round_count << std::endl;
-    
-    if (player) {
-        ss << "Player HP: " << std::fixed << std::setprecision(1) << player->get_HP() 
-           << " | ATK: " << player->get_ATK() 
-           << " | DEF: " << player->get_DEF() << std::endl;
-    }
-    
-    if (currentMonster) {
-        ss << "Monster: " << currentMonster->getName() << std::endl;
-        ss << "Monster HP: " << currentMonster->getHP() 
-           << "/" << currentMonster->getMaxHP() 
-           << " | ATK: " << currentMonster->getATK() 
-           << " | DEF: " << currentMonster->getDEF() << std::endl;
-    }
-    
-    ss << "Battle Status: " << (isBattleActive ? "Active" : "Ended") << std::endl;
-    
-    return ss.str();
-}
-
 std::string BattleSystem::showBattleLog() {
     std::stringstream ss;
     ss << "=== Battle Log ===" << std::endl;
@@ -232,4 +221,9 @@ std::string BattleSystem::showBattleLog() {
     }
     
     return ss.str();
+}
+
+void BattleSystem::applyRewards() {
+    player->change_EXP(reward[0]);
+    player->change_Money(reward[1]);
 }

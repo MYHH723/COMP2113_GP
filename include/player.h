@@ -9,25 +9,31 @@
 #include <nlohmann/json.hpp>
 
 // Player class - manages player character attributes and inventory
-class Player {
+class Player : public Panel {
 private:
-    std::map<std::string, float> state;  // Stores ATK, DEF, HP, EXP, Money
+    std::string playerName;
+    std::map<std::string, float> state;  // Stores level, ATK, DEF, HP, EXP, Money
     Inventory* inventory;
+    float maxHP;
     bool isAlive;
     bool isPoisoned;
     bool isStunned;
 
 public:
     Player();
+    Player(std::string name);
     ~Player();
 
     // Getters
     std::map<std::string, float> get_state() const;
+    int get_Level() const;
     float get_ATK() const;
     float get_DEF() const;
     float get_HP() const;
     float get_EXP() const;
     float get_Money() const;
+    float get_maxHP() const;
+    Inventory* get_inventory() const { return inventory; }
     bool get_isAlive() const;
     bool get_isPoisoned() const;
     bool get_isStunned() const;
@@ -51,6 +57,12 @@ public:
     void sort_items();
     std::string itemToString(const Item& item);
 
+    // Panel overrides
+    void show_status() override;     
+    void show_inventory() override;  
+
+    // Other methods
+    void level_up();
     nlohmann::json toJson() const;
     void fromJson(const nlohmann::json& j);
 
@@ -68,10 +80,9 @@ public:
     Panel();
     ~Panel();
 
-    void show_status(const Player& player);
-    void show_inventory(const Player& player);
-    void show_condition(const Player& player);
-    void show_message(const std::string& message);
+    virtual void show_status();
+    virtual void show_inventory();
+
 };
 
 // Inventory class - manages items
