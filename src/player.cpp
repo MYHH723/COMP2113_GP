@@ -18,6 +18,7 @@ bool Inventory::add_item(const std::string &itemName)
     if (items.size() < capacity)
     {
         items.push_back(itemName);
+        sort_items();
         return true;
     }
     return false;
@@ -46,29 +47,6 @@ bool Inventory::use_item(const std::string &itemName)
 {
     // Simple implementation: remove on use
     return remove_item(itemName);
-}
-
-void Inventory::show_items() const
-{
-    std::cout << "Inventory (" << items.size() << "/" << capacity << "):" << std::endl;
-    for (const auto &itemStr : items)
-    {
-        // Parse name from "Type:Grade:Name:..."
-        size_t pos1 = itemStr.find(':');
-        if (pos1 != std::string::npos)
-        {
-            size_t pos2 = itemStr.find(':', pos1 + 1);
-            if (pos2 != std::string::npos)
-            {
-                size_t pos3 = itemStr.find(':', pos2 + 1);
-                if (pos3 != std::string::npos)
-                {
-                    std::string name = itemStr.substr(pos2 + 1, pos3 - pos2 - 1);
-                    std::cout << "- " << name << std::endl;
-                }
-            }
-        }
-    }
 }
 
 void Inventory::sort_items()
@@ -115,29 +93,6 @@ int Inventory::get_current_size() const
     return items.size();
 }
 
-// Panel implementation
-Panel::Panel() {}
-
-Panel::~Panel() {}
-
-void Player::show_status() 
-{
-    std::cout << "=== Player Status ===" << std::endl;
-    std::cout << "ATK: " << this->get_ATK() << std::endl;
-    std::cout << "DEF: " << this->get_DEF() << std::endl;
-    std::cout << "HP: " << this->get_HP() << std::endl;
-    std::cout << "EXP: " << this->get_EXP() << std::endl;
-    std::cout << "Money: " << this->get_Money() << std::endl;
-    std::cout << "Alive: " << (this->get_isAlive() ? "Yes" : "No") << std::endl;
-    std::cout << "Poisoned: " << (this->get_isPoisoned() ? "Yes" : "No") << std::endl;
-    std::cout << "Stunned: " << (this->get_isStunned() ? "Yes" : "No") << std::endl;
-}
-
-void Player::show_inventory()
-{
-    std::cout << "=== Inventory ===" << std::endl;
-    this->show_items();
-}
 
 
 // Player implementation
@@ -218,6 +173,10 @@ bool Player::get_isStunned() const
     return isStunned;
 }
 
+std::list<std::string> Player::get_all_items() const{
+    return inventory->get_items();
+}
+
 void Player::change_state(const std::string &key, float value)
 {
     state[key] = value;
@@ -293,11 +252,6 @@ void Player::remove_item(const std::string &itemName)
 void Player::use_item(const std::string &itemName)
 {
     inventory->use_item(itemName);
-}
-
-void Player::show_items() const
-{
-    inventory->show_items();
 }
 
 void Player::sort_items()
