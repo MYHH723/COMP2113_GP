@@ -23,7 +23,7 @@ public:
     ~Shop();
 
     // Initialization
-    void initShop(Merchant* m, Player* p, Inventory* inv);
+    void initShop(Merchant* m, Player* p);
 
     // Transactions
     bool buyItem(ItemType type, int grade);

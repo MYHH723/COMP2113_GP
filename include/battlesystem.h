@@ -9,7 +9,7 @@ class Player;
 class Monster;
 
 // BattleResult enumeration
-enum class BattleResult {
+enum struct BattleResult {
     PLAYER_WIN,
     PLAYER_LOSE,
     PLAYER_FLEE,
@@ -25,6 +25,7 @@ private:
     bool isBattleActive;
     BattleResult lastResult;
     std::vector<std::string> battleLog;
+    float reward[2];
 
 public:
     BattleSystem();
@@ -50,9 +51,9 @@ public:
     bool get_isBattleActive() const;
     std::vector<std::string> getBattleLog() const;
 
-    // Display
-    std::string showBattleStatus();
+    // Settlement
     std::string showBattleLog();
+    void applyRewards();
 };
 
 #endif // BATTLESYSTEM_H
