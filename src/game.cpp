@@ -131,10 +131,28 @@ void Game::initGame() {
     pause();
 }
 
+// ========== Global difficulty scaling variables ==========
+float g_monsterHpMultiplier = 1.0f;
+int g_trapDamageMin = 0;
+int g_trapDamageMax = 0;
+
 void Game::applyDifficultyScaling() {
     // In a full implementation, you can set global variables or pass multipliers
     // to the monster and trap classes. For now, nothing is needed here because
     // MapGenerator and Room classes will read the global arrays above.
+    const float MONSTER_HP_MULT[] = {0.8f, 1.0f, 1.3f};
+
+    // Trap damage ranges (Increased to be meaningful for 1000 HP)
+    // Easy:    80 - 150
+    // Normal: 150 - 280
+    // Hard:   250 - 450
+    const int TRAP_DAMAGE_MIN[] = {80, 150, 250};
+    const int TRAP_DAMAGE_MAX[] = {150, 280, 450};
+
+    // Set global variables based on current difficulty
+    g_monsterHpMultiplier = MONSTER_HP_MULT[difficulty];
+    g_trapDamageMin = TRAP_DAMAGE_MIN[difficulty];
+    g_trapDamageMax = TRAP_DAMAGE_MAX[difficulty];
 }
 
 void Game::generateRooms() {

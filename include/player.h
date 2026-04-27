@@ -14,7 +14,8 @@ private:
     std::string playerName;
     std::map<std::string, float> state;  // Stores level, ATK, DEF, HP, EXP, Money
     Inventory* inventory;
-    float maxHP;
+    std::map<std::string, std::string> equippedItems; 
+    float maxHP; 
     bool isAlive;
     bool isPoisoned;
     bool isStunned;
@@ -62,7 +63,10 @@ public:
     void show_inventory() override;  
 
     // Other methods
+    void equip_weapon(const std::string& itemName);
+    void equip_armor(const std::string& itemName);
     void level_up();
+    float Player::parseEffectValue(const std::string& itemStr) const;
     nlohmann::json toJson() const;
     void fromJson(const nlohmann::json& j);
 
@@ -102,6 +106,7 @@ public:
     bool use_item(const std::string& itemName);
     void show_items() const;
     void sort_items();
+    std::string get_item(const std::string& itemName);
     int get_capacity() const;
     int get_current_size() const;
 };

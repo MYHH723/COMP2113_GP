@@ -1,4 +1,6 @@
 #include "merchant.h"
+#include "item.h"
+#include "types.h"
 #include <iostream>
 #include <string>
 
@@ -14,19 +16,19 @@ Merchant::~Merchant() = default;
 // Initialize all merchant goods with 3 rarity levels per item type
 void Merchant::initMerchant() {
     // Initialize Consumable Items (Potion)
-    goods[CONSUMABLE][0] = Item("Low Potion", CONSUMABLE, LOW, LOW_PRICE, LOW_HEAL, 0, 0);
-    goods[CONSUMABLE][1] = Item("Medium Potion", CONSUMABLE, MEDIUM, MEDIUM_PRICE, MEDIUM_HEAL, 0, 0);
-    goods[CONSUMABLE][2] = Item("High Potion", CONSUMABLE, HIGH, HIGH_PRICE, HIGH_HEAL, 0, 0);
+    goods["POTION"][0] = Item("Low Potion", ItemType::POTION, ItemRarity::LOW, LOW_PRICE, LOW_HEAL, 0, 0);
+    goods["POTION"][1] = Item("Medium Potion", ItemType::POTION, ItemRarity::MEDIUM, MEDIUM_PRICE, MEDIUM_HEAL, 0, 0);
+    goods["POTION"][2] = Item("High Potion", ItemType::POTION, ItemRarity::HIGH, HIGH_PRICE, HIGH_HEAL, 0, 0);
 
     // Initialize Weapon Items (Sword)
-    goods[WEAPON][0] = Item("Iron Sword", WEAPON, LOW, LOW_PRICE, 0, LOW_ATTACK, 0);
-    goods[WEAPON][1] = Item("Steel Sword", WEAPON, MEDIUM, MEDIUM_PRICE, 0, MEDIUM_ATTACK, 0);
-    goods[WEAPON][2] = Item("Golden Sword", WEAPON, HIGH, HIGH_PRICE, 0, HIGH_ATTACK, 0);
+    goods["WEAPON"][0] = Item("Iron Sword", ItemType::WEAPON, ItemRarity::LOW, LOW_PRICE, 0, LOW_ATTACK, 0);
+    goods["WEAPON"][1] = Item("Steel Sword", ItemType::WEAPON, ItemRarity::MEDIUM, MEDIUM_PRICE, 0, MEDIUM_ATTACK, 0);
+    goods["WEAPON"][2] = Item("Golden Sword", ItemType::WEAPON, ItemRarity::HIGH, HIGH_PRICE, 0, HIGH_ATTACK, 0);
 
     // Initialize Armor Items
-    goods[ARMOR][0] = Item("Cloth Armor", ARMOR, LOW, LOW_PRICE, 0, 0, LOW_DEFENSE);
-    goods[ARMOR][1] = Item("Iron Armor", ARMOR, MEDIUM, MEDIUM_PRICE, 0, 0, MEDIUM_DEFENSE);
-    goods[ARMOR][2] = Item("Dragon Armor", ARMOR, HIGH, HIGH_PRICE, 0, 0, HIGH_DEFENSE);
+    goods["ARMOR"][0] = Item("Cloth Armor", ItemType::ARMOR, ItemRarity::LOW, LOW_PRICE, 0, 0, LOW_DEFENSE);
+    goods["ARMOR"][1] = Item("Iron Armor", ItemType::ARMOR, ItemRarity::MEDIUM, MEDIUM_PRICE, 0, 0, MEDIUM_DEFENSE);
+    goods["ARMOR"][2] = Item("Dragon Armor", ItemType::ARMOR, ItemRarity::HIGH, HIGH_PRICE, 0, 0, HIGH_DEFENSE);
 }
 
 // Check if the merchant has the specified item type and rarity index
@@ -53,19 +55,19 @@ void Merchant::showGoodsList() const {
     // Display all consumable items
     std::cout << "\n[Consumable Items]" << std::endl;
     for (int i = 0; i < 3; ++i) {
-        goods.at(CONSUMABLE).at(i).displayItemInfo();
+        goods.at("POTION").at(i).displayItemInfo();
     }
 
     // Display all weapon items
     std::cout << "[Weapon Items]" << std::endl;
     for (int i = 0; i < 3; ++i) {
-        goods.at(WEAPON).at(i).displayItemInfo();
+        goods.at("WEAPON").at(i).displayItemInfo();
     }
 
     // Display all armor items
     std::cout << "[Armor Items]" << std:: endl;
     for (int i = 0; i < 3; ++i) {
-        goods.at(ARMOR).at(i).displayItemInfo();
+        goods.at("ARMOR").at(i).displayItemInfo();
     }
 }
 
