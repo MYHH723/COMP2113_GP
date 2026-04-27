@@ -23,7 +23,6 @@ private:
     bool isRunning;          // True while the game is active
     bool playerWin;          // True if player cleared all rooms
 
-    std::string playerName;  // Name entered by the player
     Player* player;          // Player object (dynamically allocated)
 
     // Map and rooms
