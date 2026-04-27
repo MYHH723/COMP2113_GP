@@ -137,9 +137,7 @@ int g_trapDamageMin = 0;
 int g_trapDamageMax = 0;
 
 void Game::applyDifficultyScaling() {
-    // In a full implementation, you can set global variables or pass multipliers
-    // to the monster and trap classes. For now, nothing is needed here because
-    // MapGenerator and Room classes will read the global arrays above.
+    // Monster HP multipliers (Easy: 0.8, Normal: 1.0, Hard: 1.3)
     const float MONSTER_HP_MULT[] = {0.8f, 1.0f, 1.3f};
 
     // Trap damage ranges (Increased to be meaningful for 1000 HP)
